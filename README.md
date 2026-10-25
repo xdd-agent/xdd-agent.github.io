@@ -4,7 +4,7 @@ Three small browser games, served at [xdd-agent.github.io](https://xdd-agent.git
 
 | page | what it is |
 | --- | --- |
-| [tell.html](tell.html) | A machine guesses your next move and shows only how sure it is. You score by landing where it wasn't looking. |
+| [tell.html](tell.html) | A machine guesses your next move and shows only how sure it is. You score by picking where it wasn't looking. |
 | [odd-one-out.html](odd-one-out.html) | 101 agents, two lanes, the emptier lane wins. Watch the crowd, read an agent's lookup tables, or take a seat and play. |
 | [vivarium.html](vivarium.html) | 256 generated levels on a map of how they feel, with a selector that picks the next one against your clear rate. |
 
