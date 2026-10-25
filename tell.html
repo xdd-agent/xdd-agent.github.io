@@ -1,0 +1,2183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TELL — a game about how easy you are to read</title>
+<style>
+:root {
+  --bg: #0a0b0d;
+  --panel: #101319;
+  --panel-2: #0c0f14;
+  --line: #1e242e;
+  --line-hi: #333d4b;
+  --text: #e8e6e1;
+  --dim: #97a1b0;
+  --amber: #f0b35a;
+  --mint: #74d3a4;
+  --rose: #e8747c;
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(900px 520px at 50% -12%, #161b23 0%, #0a0b0d 62%) #0a0b0d;
+  color: var(--text);
+  font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 18px 18px 26px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 680px;
+  margin: auto 0;
+}
+
+/* ---------- header ---------- */
+
+.top {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.brand {
+  font: 600 22px/1 var(--mono);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+}
+
+.tagline {
+  color: var(--dim);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+}
+
+.counter {
+  margin-left: auto;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.counter b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------- score strip ---------- */
+
+.strip {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 2px 14px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.score.right {
+  justify-content: flex-end;
+}
+
+.score .lab {
+  font: 500 10px/1 var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--dim);
+}
+
+.score .val {
+  font: 600 24px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.score.you .val {
+  color: var(--mint);
+}
+
+.score.it .val {
+  color: var(--amber);
+}
+
+.act {
+  text-align: center;
+  font: 500 10px/1.4 var(--mono);
+  letter-spacing: 0.14em;
+  color: var(--dim);
+  transition: color 0.3s;
+}
+
+.act b {
+  display: block;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+
+.act.flash b {
+  color: var(--amber);
+  text-shadow: 0 0 18px rgba(240, 179, 90, 0.55);
+}
+
+/* ---------- board ---------- */
+
+.board {
+  position: relative;
+  margin: 16px 0;
+  padding: 16px 20px 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #12161d 0%, #0d1015 100%);
+  overflow: hidden;
+  min-height: 208px;
+  display: flex;
+  flex-direction: column;
+}
+
+.board::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -180px;
+  width: 420px;
+  height: 340px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(240, 179, 90, 0.13), transparent 72%);
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.board.reading::before {
+  background: radial-gradient(closest-side, rgba(232, 116, 124, 0.16), transparent 72%);
+}
+
+.eyebrow {
+  font: 500 10px/1 var(--mono);
+  letter-spacing: 0.22em;
+  color: var(--dim);
+}
+
+.watch {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 0 4px;
+  text-align: center;
+}
+
+.glyph {
+  font: 400 52px/1 var(--mono);
+  color: var(--amber);
+  text-shadow: 0 0 34px rgba(240, 179, 90, 0.35);
+  transition: color 0.25s, text-shadow 0.25s, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.glyph.beat {
+  transform: scale(1.06);
+}
+
+.glyph.idle {
+  color: #66707e;
+  text-shadow: none;
+  font-size: 54px;
+  animation: lens 2.6s ease-in-out infinite;
+}
+
+@keyframes lens {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.04);
+  }
+}
+
+.pips {
+  display: flex;
+  gap: 5px;
+  height: 8px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.pip {
+  width: 14px;
+  height: 4px;
+  border-radius: 99px;
+  background: #232a34;
+  transition: background 0.25s;
+}
+
+.pip.on {
+  background: var(--amber);
+}
+
+.whisper {
+  font: 400 12px/1.4 var(--mono);
+  color: var(--dim);
+  letter-spacing: 0.04em;
+}
+
+/* reveal bars */
+
+.reveal {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 2px;
+}
+
+.bars {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 20px 1fr 52px;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.bar.pick {
+  opacity: 1;
+}
+
+.bar .bg {
+  font: 400 14px/1 var(--mono);
+  color: var(--dim);
+  text-align: center;
+}
+
+.bar.pick .bg {
+  color: var(--text);
+}
+
+.track {
+  height: 7px;
+  border-radius: 99px;
+  background: #191f27;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: #75849a;
+  transition: width 0.5s cubic-bezier(0.18, 0.8, 0.2, 1), background 0.3s;
+}
+
+.bar.pick .fill.break {
+  background: var(--mint);
+}
+
+.bar.pick .fill.read {
+  background: var(--rose);
+}
+
+.bar .pv {
+  font: 500 12px/1 var(--mono);
+  color: var(--dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar.pick .pv {
+  color: var(--text);
+}
+
+/* ---------- keys ---------- */
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.key {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px 9px;
+  background: #131820;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.2s, background 0.2s, opacity 0.2s;
+}
+
+.key:hover:not([disabled]) {
+  border-color: var(--line-hi);
+  background: #171d26;
+  transform: translateY(-1px);
+}
+
+.key:active:not([disabled]) {
+  transform: translateY(1px) scale(0.995);
+}
+
+.key[disabled] {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.key .kg {
+  font: 400 21px/1 var(--mono);
+}
+
+.key .kn {
+  font: 500 9.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--dim);
+}
+
+.key .kb {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font: 500 9px/1 var(--mono);
+  color: #4c5665;
+}
+
+/* ---------- say + ribbon ---------- */
+
+.say {
+  min-height: 20px;
+  margin: 10px 2px 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--dim);
+  transition: color 0.2s;
+}
+
+.say.good {
+  color: var(--mint);
+}
+
+.say.bad {
+  color: var(--rose);
+}
+
+.say.gold {
+  color: var(--amber);
+}
+
+.ribbon {
+  display: flex;
+  gap: 4px;
+  height: 6px;
+}
+
+.tick {
+  flex: 1;
+  border-radius: 2px;
+  background: #191f27;
+  transition: background 0.3s;
+}
+
+.tick.break {
+  background: var(--mint);
+}
+
+.tick.read {
+  background: #7a3941;
+}
+
+.tick.cold {
+  background: var(--amber);
+}
+
+.tick.push {
+  background: #3d4653;
+}
+
+/* ---------- debug ---------- */
+
+.rounds {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 16px;
+}
+
+.rounds .rlab {
+  font: 500 9px/1 var(--mono);
+  letter-spacing: 0.18em;
+  color: #6b7686;
+  margin-right: 9px;
+}
+
+.rpill {
+  min-width: 32px;
+  padding: 5px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: #11161d;
+  color: #a7b1c0;
+  font: 500 11px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.rpill:hover {
+  color: var(--text);
+  border-color: var(--line-hi);
+}
+
+.rpill.on {
+  color: var(--amber);
+  border-color: rgba(240, 179, 90, 0.55);
+  background: rgba(240, 179, 90, 0.08);
+}
+
+.ror {
+  font: 400 9.5px/1 var(--mono);
+  letter-spacing: 0.08em;
+  color: #5f6a79;
+  margin: 0 2px 0 4px;
+}
+
+.rnum {
+  width: 66px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  border: 1px solid #33404f;
+  background: #090d12;
+  color: var(--text);
+  font: 500 10.5px/1 var(--mono);
+  text-align: left;
+  caret-color: var(--amber);
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.rnum::placeholder {
+  color: #8b96a6;
+  letter-spacing: 0.02em;
+}
+
+.rnum:hover {
+  border-color: var(--line-hi);
+}
+
+.rnum:focus {
+  border-color: var(--amber);
+  background: #141a22;
+}
+
+.rnum:focus::placeholder {
+  color: #4f5967;
+}
+
+.rounds.end {
+  margin: 18px 0 0;
+  justify-content: flex-start;
+}
+
+.mind {
+  display: none;
+  margin-top: 16px;
+  border: 1px dashed var(--line-hi);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: 400 11.5px/1.6 var(--mono);
+  color: var(--dim);
+}
+
+.mind.on {
+  display: block;
+}
+
+.mind table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mind td {
+  padding: 2px 0;
+}
+
+.mind td.n {
+  color: var(--text);
+}
+
+.mind .w {
+  color: var(--amber);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mind .off {
+  opacity: 0.35;
+}
+
+/* ---------- end screen ---------- */
+
+.over {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 7, 9, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-y: auto;
+  z-index: 20;
+  animation: fade 0.35s ease both;
+}
+
+.over[hidden] {
+  display: none;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #12161d 0%, #0b0e12 100%);
+  padding: 20px 22px 18px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  animation: rise 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.card h1 {
+  margin: 6px 0 3px;
+  font: 600 30px/1.05 var(--mono);
+  letter-spacing: 0.06em;
+}
+
+.card h1.opaque {
+  color: var(--mint);
+}
+
+.card h1.open {
+  color: var(--rose);
+}
+
+.card .sub {
+  margin: 0 0 18px;
+  color: var(--dim);
+  font-size: 13.5px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.stat {
+  background: #0f1319;
+  padding: 8px 11px;
+}
+
+.stat .k {
+  font: 500 9px/1.4 var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--dim);
+}
+
+.stat .v {
+  font: 600 20px/1.2 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat .v small {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--dim);
+}
+
+.sect {
+  margin: 14px 0 4px;
+  font: 500 9.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  color: var(--dim);
+}
+
+.tells {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tells li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #1d2531;
+  font-size: 13px;
+}
+
+.tells li:last-child {
+  border-bottom: 0;
+}
+
+.tells .t {
+  color: var(--text);
+}
+
+.tells .t em {
+  font-style: normal;
+  font-size: 14px;
+  color: var(--amber);
+}
+
+.tells .q {
+  font: 500 12px/1.4 var(--mono);
+  color: var(--dim);
+  white-space: nowrap;
+}
+
+.theories {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.th {
+  display: grid;
+  grid-template-columns: 96px 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.th .tn {
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+.th .track {
+  height: 5px;
+}
+
+.th .fill {
+  background: var(--amber);
+  opacity: 0.8;
+}
+
+.th .pc {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 11px;
+  border: 1px solid var(--line-hi);
+  background: #161c24;
+  color: var(--text);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn:hover {
+  background: #1c232d;
+  border-color: #46525f;
+}
+
+.btn:focus {
+  outline: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.btn.primary {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #16120a;
+}
+
+.btn.primary:hover {
+  background: #ffc76f;
+}
+
+.foot {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #5d6674;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .tagline {
+    display: none;
+  }
+
+  .glyph {
+    font-size: 54px;
+  }
+
+  .board {
+    min-height: 240px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="brand">TELL</div>
+    <div class="tagline">a game about how easy you are to read</div>
+    <div class="counter">ROUND <b id="roundNum">01</b> / <span id="roundTotal">30</span></div>
+  </header>
+
+  <div class="strip">
+    <div class="score you"><span class="lab">YOU</span><span class="val" id="scoreYou">0</span></div>
+    <div class="act" id="actLine"><b id="actName">ACT I</b><span id="actNote">it is counting your habits</span></div>
+    <div class="score it right"><span class="val" id="scoreIt">0</span><span class="lab">IT</span></div>
+  </div>
+
+  <section class="board" id="board">
+    <div class="eyebrow" id="boardLabel">THE MACHINE IS READING YOU</div>
+    <div class="watch">
+      <div class="glyph" id="glyph">·</div>
+      <div class="pips" id="pips"></div>
+      <div class="whisper" id="whisper">reading you</div>
+    </div>
+    <div class="reveal">
+      <div class="eyebrow">WHAT IT EXPECTED</div>
+      <div class="bars" id="bars">
+        <div class="bar"><span class="bg">●</span><span class="track"><span class="fill"></span></span><span class="pv"></span></div>
+        <div class="bar"><span class="bg">▲</span><span class="track"><span class="fill"></span></span><span class="pv"></span></div>
+        <div class="bar"><span class="bg">■</span><span class="track"><span class="fill"></span></span><span class="pv"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="keys" id="keys">
+    <button class="key" data-a="0"><span class="kb">1</span><span class="kg">●</span><span class="kn">DOT</span></button>
+    <button class="key" data-a="1"><span class="kb">2</span><span class="kg">▲</span><span class="kn">TRI</span></button>
+    <button class="key" data-a="2"><span class="kb">3</span><span class="kg">■</span><span class="kn">BOX</span></button>
+  </div>
+
+  <p class="say" id="say">pick a move. it has already committed.</p>
+  <div class="ribbon" id="ribbon"></div>
+  <div class="rounds" id="roundsPick"></div>
+  <div class="mind" id="mind"></div>
+  <p class="foot">it scores when it calls your move · you score when it gave your move less than a third · keys 1 2 3 · d for its mind</p>
+</main>
+
+<div class="over" id="over" hidden>
+  <div class="card" id="card">
+    <div class="eyebrow">THE READ</div>
+    <h1 id="verdict">—</h1>
+    <p class="sub" id="verdictLine"></p>
+    <div class="stats" id="stats"></div>
+    <div class="sect">TELLS IT FOUND</div>
+    <ul class="tells" id="tells"></ul>
+    <div class="sect">WHAT FIGURED YOU OUT</div>
+    <div class="theories" id="theories"></div>
+    <div class="rounds end" id="roundsPickEnd"></div>
+    <div class="actions">
+      <button class="btn primary" id="again">PLAY AGAIN</button>
+      <button class="btn" id="copy">COPY REPORT</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* TELL — core logic. No DOM, no dependencies.
+ *
+ * A duel of predictability: before you move, the machine commits to a guess
+ * about your next move. It shows you only *which* move it is watching and how
+ * sure it is — never the full distribution. You score by landing somewhere it
+ * did not expect.
+ *
+ * The machine is an ensemble of cheap "theories about you" (marginal habits,
+ * sequences, runs, cycles, reactions to being watched). A Hedge / multiplicative
+ * weights layer decides, round by round, which theory deserves attention.
+ */
+(function (root) {
+  'use strict';
+
+  var N = 3;
+  var UNIFORM = [1 / 3, 1 / 3, 1 / 3];
+  var GLYPHS = ['●', '▲', '■'];
+  var NAMES = ['DOT', 'TRI', 'BOX'];
+
+  /* ------------------------------------------------------------------ *
+   * small maths
+   * ------------------------------------------------------------------ */
+
+  /** Deterministic 32-bit PRNG (mulberry32). */
+  function rng(seed) {
+    var a = (seed >>> 0) || 1;
+    return function () {
+      a |= 0;
+      a = (a + 0x6d2b79f5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function norm(p) {
+    var s = p[0] + p[1] + p[2];
+    if (!(s > 0)) return UNIFORM.slice();
+    return [p[0] / s, p[1] / s, p[2] / s];
+  }
+
+  /**
+   * Keep a distribution inside [lo, hi] by sliding it toward uniform — clipping
+   * and renormalising alone would push it straight back out of the bounds.
+   */
+  function clipNorm(p, lo, hi) {
+    var q = norm(p);
+    var i;
+    var hiSeen = Math.max(q[0], q[1], q[2]);
+    if (hiSeen > hi) {
+      var t = (hiSeen - hi) / Math.max(1e-9, hiSeen - 1 / 3);
+      for (i = 0; i < 3; i++) q[i] = q[i] + t * (1 / 3 - q[i]);
+    }
+    var loSeen = Math.min(q[0], q[1], q[2]);
+    if (loSeen < lo) {
+      var u = (lo - loSeen) / Math.max(1e-9, 1 / 3 - loSeen);
+      for (i = 0; i < 3; i++) q[i] = q[i] + u * (1 / 3 - q[i]);
+    }
+    return norm(q);
+  }
+
+  function argmaxIdx(p) {
+    var best = 0;
+    for (var i = 1; i < 3; i++) if (p[i] > p[best]) best = i;
+    return best;
+  }
+
+  /** argmax with random tie-breaking, so a flat prediction is not exploitable. */
+  function argmaxRand(p, rand) {
+    var best = -1;
+    var ties = [];
+    for (var i = 0; i < 3; i++) {
+      if (p[i] > best + 1e-12) {
+        best = p[i];
+        ties = [i];
+      } else if (Math.abs(p[i] - best) <= 1e-12) {
+        ties.push(i);
+      }
+    }
+    return ties.length === 1 ? ties[0] : ties[Math.floor(rand() * ties.length)];
+  }
+
+  function entropyBits(counts) {
+    var n = counts[0] + counts[1] + counts[2];
+    if (n === 0) return 0;
+    var h = 0;
+    for (var i = 0; i < 3; i++) {
+      var p = counts[i] / n;
+      if (p > 0) h -= p * Math.log2(p);
+    }
+    return h;
+  }
+
+  function mean(xs) {
+    if (!xs.length) return 0;
+    var s = 0;
+    for (var i = 0; i < xs.length; i++) s += xs[i];
+    return s / xs.length;
+  }
+
+  function pipsOf(pmax) {
+    if (pmax < 0.36) return 0;
+    if (pmax < 0.45) return 1;
+    if (pmax < 0.55) return 2;
+    if (pmax < 0.65) return 3;
+    if (pmax < 0.75) return 4;
+    return 5;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * history helpers (round = {a, shown, p, outcome})
+   * ------------------------------------------------------------------ */
+
+  function lastAction(r) {
+    return r.length ? r[r.length - 1].a : null;
+  }
+
+  function lastShown(r) {
+    return r.length ? r[r.length - 1].shown : null;
+  }
+
+  function lastOutcome(r) {
+    return r.length ? r[r.length - 1].outcome : null;
+  }
+
+  function runLen(r) {
+    if (!r.length) return 0;
+    var a = r[r.length - 1].a;
+    var n = 0;
+    for (var i = r.length - 1; i >= 0 && r[i].a === a; i--) n++;
+    return n;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * experts — each is a theory about the player, stated as a conditional
+   * distribution over the next action.
+   * ------------------------------------------------------------------ */
+
+  /**
+   * Build a distribution by counting what followed every earlier moment that
+   * shared the current context. `keyFn(history)` returns a string key, or null
+   * when the context does not exist yet.
+   */
+  function ctxDist(rounds, keyFn, opts) {
+    opts = opts || {};
+    var key = keyFn(rounds);
+    if (key === null) {
+      return opts.fallback ? opts.fallback(rounds) : UNIFORM.slice();
+    }
+    var c = [1, 1, 1];
+    var n = 0;
+    for (var t = 1; t < rounds.length; t++) {
+      if (keyFn(rounds.slice(0, t)) === key) {
+        c[rounds[t].a] += 1;
+        n++;
+      }
+    }
+    var dist = norm(c);
+    var min = opts.min || 0;
+    if (n < min && opts.fallback) {
+      var fb = opts.fallback(rounds);
+      var w = min > 0 ? n / min : 1;
+      dist = norm([
+        w * dist[0] + (1 - w) * fb[0],
+        w * dist[1] + (1 - w) * fb[1],
+        w * dist[2] + (1 - w) * fb[2]
+      ]);
+    }
+    return dist;
+  }
+
+  function predictCount(r) {
+    return ctxDist(r, function () {
+      return 'marginal';
+    });
+  }
+
+  function predictEcho(r) {
+    return ctxDist(
+      r,
+      function (h) {
+        var a = lastAction(h);
+        return a === null ? null : 'a' + a;
+      },
+      { min: 2, fallback: predictCount }
+    );
+  }
+
+  function predictRun(r) {
+    return ctxDist(
+      r,
+      function (h) {
+        var a = lastAction(h);
+        if (a === null) return null;
+        return 'a' + a + 'r' + Math.min(runLen(h), 3);
+      },
+      { min: 2, fallback: predictEcho }
+    );
+  }
+
+  function predictPair(r) {
+    return ctxDist(
+      r,
+      function (h) {
+        if (h.length < 2) return null;
+        return 'p' + h[h.length - 2].a + h[h.length - 1].a;
+      },
+      { min: 3, fallback: predictEcho }
+    );
+  }
+
+  function predictFlinch(r) {
+    return ctxDist(
+      r,
+      function (h) {
+        var s = lastShown(h);
+        return s === null ? null : 's' + s;
+      },
+      { min: 2, fallback: predictCount }
+    );
+  }
+
+  function predictAftermath(r) {
+    return ctxDist(
+      r,
+      function (h) {
+        var o = lastOutcome(h);
+        return o === null ? null : 'o' + o;
+      },
+      { min: 2, fallback: predictCount }
+    );
+  }
+
+  /** Cycle detector: does the recent play keep repeating a block of length k? */
+  function predictCycle(r) {
+    var n = r.length;
+    if (n < 4) return UNIFORM.slice();
+    var best = null;
+    for (var k = 2; k <= 6; k++) {
+      if (n < 2 * k) continue;
+      var hit = 0;
+      for (var t = n - k; t < n; t++) {
+        if (r[t].a === r[t - k].a) hit++;
+      }
+      var score = hit / k;
+      if (!best || score > best.score) best = { k: k, score: score };
+    }
+    if (!best || best.score < 0.75) return UNIFORM.slice();
+    var pred = r[n - best.k].a;
+    var conf = Math.min(0.85, 0.35 + 0.55 * best.score);
+    var rest = (1 - conf) / 2;
+    var out = [rest, rest, rest];
+    out[pred] = conf;
+    return out;
+  }
+
+  var EXPERTS = [
+    {
+      id: 'tally',
+      name: 'the tally',
+      line: 'your overall habits',
+      act: 0,
+      predict: predictCount
+    },
+    {
+      id: 'echo',
+      name: 'the echo',
+      line: 'what follows what',
+      act: 1,
+      predict: predictEcho
+    },
+    {
+      id: 'run',
+      name: 'the run-keeper',
+      line: 'how long you stay on something',
+      act: 1,
+      predict: predictRun
+    },
+    {
+      id: 'cycle',
+      name: 'the metronome',
+      line: 'any rhythm you fall into',
+      act: 1,
+      predict: predictCycle
+    },
+    {
+      id: 'pair',
+      name: 'the pattern',
+      line: 'two moves back, not one',
+      act: 2,
+      predict: predictPair
+    },
+    {
+      id: 'flinch',
+      name: 'the flinch',
+      line: 'what you do when it looks at you',
+      act: 1,
+      predict: predictFlinch
+    },
+    {
+      id: 'aftermath',
+      name: 'the aftermath',
+      line: 'what a win or a loss does to you',
+      act: 2,
+      predict: predictAftermath
+    }
+  ];
+
+  var ACTS = [
+    { label: 'ACT I', note: 'it is counting your habits' },
+    { label: 'ACT II', note: 'it is reading your sequences' },
+    { label: 'ACT III', note: 'it is reading your tells' }
+  ];
+
+  var MIN_ROUNDS = 6;
+  var MAX_ROUNDS = 200;
+
+  function clampRounds(n) {
+    var v = Math.round(Number(n));
+    if (!isFinite(v) || v < MIN_ROUNDS) v = MIN_ROUNDS;
+    return Math.min(MAX_ROUNDS, v);
+  }
+
+  /** Acts are thirds of the session, whatever its length. */
+  function actIndexFor(t, maxRounds) {
+    var frac = maxRounds > 0 ? t / maxRounds : 0;
+    if (frac >= 2 / 3) return 2;
+    if (frac >= 1 / 3) return 1;
+    return 0;
+  }
+
+  function actFor(t, maxRounds) {
+    return ACTS[actIndexFor(t, maxRounds)];
+  }
+
+  /* ------------------------------------------------------------------ *
+   * session
+   * ------------------------------------------------------------------ */
+
+  function Session(opts) {
+    opts = opts || {};
+    this.maxRounds = clampRounds(opts.maxRounds == null ? 30 : opts.maxRounds);
+    this.eta = opts.eta == null ? 0.55 : opts.eta; // Hedge learning rate
+    this.eps = opts.eps == null ? 0.03 : opts.eps; // uniform floor
+    this.rand = rng(opts.seed == null ? 0x5eed : opts.seed);
+    this.rounds = [];
+    this.weights = EXPERTS.map(function () {
+      return 1;
+    });
+    this.losses = EXPERTS.map(function () {
+      return 0;
+    });
+    this.score = { you: 0, it: 0 };
+    this.pending = null;
+  }
+
+  Session.prototype.actIndex = function () {
+    return actIndexFor(this.rounds.length, this.maxRounds);
+  };
+
+  Session.prototype.isActive = function (i) {
+    return this.actIndex() >= EXPERTS[i].act;
+  };
+
+  /** Compute (and cache) the machine's guess for the upcoming round. */
+  Session.prototype.predict = function () {
+    if (this.pending) return this.pending;
+
+    var parts = [];
+    var weights = [];
+    var sum = 0;
+    var i;
+
+    for (i = 0; i < EXPERTS.length; i++) {
+      if (!this.isActive(i)) {
+        parts.push(UNIFORM.slice());
+        weights.push(0);
+        continue;
+      }
+      var p = EXPERTS[i].predict(this.rounds);
+      parts.push(norm(p));
+      weights.push(this.weights[i]);
+      sum += this.weights[i];
+    }
+
+    var mix = [0, 0, 0];
+    if (sum > 0) {
+      for (i = 0; i < parts.length; i++) {
+        if (!weights[i]) continue;
+        for (var k = 0; k < 3; k++) mix[k] += weights[i] * parts[i][k];
+      }
+      mix = [mix[0] / sum, mix[1] / sum, mix[2] / sum];
+    } else {
+      mix = UNIFORM.slice();
+    }
+
+    var probs = [
+      (1 - this.eps) * mix[0] + this.eps / 3,
+      (1 - this.eps) * mix[1] + this.eps / 3,
+      (1 - this.eps) * mix[2] + this.eps / 3
+    ];
+    probs = clipNorm(probs, 0.02, 0.9);
+
+    var shown = argmaxRand(probs, this.rand);
+    this.pending = {
+      probs: probs,
+      shown: shown,
+      pips: pipsOf(probs[shown]),
+      parts: parts,
+      weights: weights.slice()
+    };
+    return this.pending;
+  };
+
+  /**
+   * Resolve a round with the player's action.
+   * You break the read if it gave your move less than a fair share (1/3).
+   */
+  Session.prototype.play = function (a) {
+    if (this.rounds.length >= this.maxRounds) throw new Error('session is over');
+    if (!(a === 0 || a === 1 || a === 2)) throw new Error('bad action: ' + a);
+
+    var pred = this.predict();
+    var p = pred.probs;
+    var pa = p[a];
+    var outcome;
+    var points = 0;
+
+    if (pa < 1 / 3 - 1e-12) {
+      // you landed somewhere it gave less than a fair share
+      outcome = 'break';
+      points = pa < 0.15 ? 2 : 1;
+      this.score.you += points;
+    } else if (pa > 1 / 3 + 1e-12 && pred.shown === a) {
+      // it named your move outright, with something to back it up
+      outcome = 'read';
+      this.score.it += 1;
+    } else {
+      // chance, or a lean it could not call: nobody scores
+      outcome = 'push';
+    }
+
+    // Hedge update on every theory that was allowed to speak this round.
+    var i;
+    for (i = 0; i < EXPERTS.length; i++) {
+      if (!this.isActive(i)) continue;
+      var loss = -Math.log(Math.max(pred.parts[i][a], 1e-4));
+      this.losses[i] += loss;
+      this.weights[i] *= Math.exp(-this.eta * loss);
+    }
+    var mx = 0;
+    for (i = 0; i < this.weights.length; i++) mx = Math.max(mx, this.weights[i]);
+    if (mx > 0) for (i = 0; i < this.weights.length; i++) this.weights[i] /= mx;
+
+    var round = {
+      t: this.rounds.length,
+      a: a,
+      shown: pred.shown,
+      p: pa,
+      probs: p.slice(),
+      outcome: outcome,
+      points: points
+    };
+    this.rounds.push(round);
+    this.pending = null;
+    return round;
+  };
+
+  Session.prototype.isOver = function () {
+    return this.rounds.length >= this.maxRounds;
+  };
+
+  /* ------------------------------------------------------------------ *
+   * tell mining — which contexts carry information about you
+   * ------------------------------------------------------------------ */
+
+  function tellCandidates(r) {
+    var list = [];
+
+    list.push({
+      id: 'after-read',
+      label: 'after it reads you, you play',
+      test: function (prev) {
+        return prev.outcome === 'read';
+      }
+    });
+    list.push({
+      id: 'after-break',
+      label: 'after you break it, you play',
+      test: function (prev) {
+        return prev.outcome === 'break';
+      }
+    });
+    list.push({
+      id: 'after-cold',
+      label: 'after a cold read, you play',
+      test: function (prev) {
+        return prev.outcome === 'break' && prev.p < 0.15;
+      }
+    });
+    list.push({
+      id: 'after-same',
+      label: 'after two of the same, you play',
+      test: function (prev, prev2) {
+        return prev2 && prev2.a === prev.a;
+      }
+    });
+    list.push({
+      id: 'after-switch',
+      label: 'after you switch, you play',
+      test: function (prev, prev2) {
+        return prev2 && prev.a !== prev2.a;
+      }
+    });
+    for (var g = 0; g < 3; g++) {
+      (function (glyph, idx) {
+        list.push({
+          id: 'watched-' + idx,
+          label: 'when it watches ' + GLYPHS[glyph] + ', you play',
+          looksAt: glyph,
+          test: function (prev) {
+            return prev.shown === glyph;
+          }
+        });
+      })(g, g);
+    }
+    return list;
+  }
+
+  function mineTells(rounds) {
+    if (rounds.length < 8) return [];
+    var counts = [0, 0, 0];
+    for (var i = 0; i < rounds.length; i++) counts[rounds[i].a]++;
+    var marginal = norm([counts[0] + 1, counts[1] + 1, counts[2] + 1]);
+    var out = [];
+    var cands = tellCandidates(rounds);
+
+    for (var c = 0; c < cands.length; c++) {
+      var cand = cands[c];
+      var cc = [0, 0, 0];
+      var n = 0;
+      for (var t = 1; t < rounds.length; t++) {
+        if (cand.test(rounds[t - 1], rounds[t - 2])) {
+          cc[rounds[t].a]++;
+          n++;
+        }
+      }
+      if (n < 4) continue;
+      var top = argmaxIdx(cc);
+      var share = cc[top] / n;
+      var lift = share / marginal[top];
+      if (n >= 4 && share >= 0.45 && lift >= 1.1) {
+        out.push({
+          id: cand.id,
+          label: cand.label,
+          action: top,
+          n: n,
+          share: share,
+          lift: lift,
+          // rank by how much the context changes your behaviour, then how often
+          // it shows up — frequency alone promotes boring habits
+          weight: share * lift * Math.sqrt(n)
+        });
+      }
+    }
+    out.sort(function (x, y) {
+      return y.weight - x.weight;
+    });
+    return out.slice(0, 3);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * report
+   * ------------------------------------------------------------------ */
+
+  function summarise(s) {
+    var r = s.rounds;
+    var n = r.length;
+    var counts = [0, 0, 0];
+    var breaks = 0;
+    var cold = 0;
+    var hits = 0;
+    var switches = 0;
+    var switchAfterRead = 0;
+    var readCtx = 0;
+    var switchAfterBreak = 0;
+    var breakCtx = 0;
+    var longest = 0;
+    var cur = 0;
+
+    for (var i = 0; i < n; i++) {
+      var x = r[i];
+      counts[x.a]++;
+      if (x.outcome === 'break') breaks++;
+      if (x.outcome === 'break' && x.p < 0.15) cold++;
+      if (x.shown === x.a) hits++;
+      if (i > 0) {
+        var changed = x.a !== r[i - 1].a;
+        if (changed) switches++;
+        if (r[i - 1].outcome === 'read') {
+          readCtx++;
+          if (changed) switchAfterRead++;
+        } else {
+          breakCtx++;
+          if (changed) switchAfterBreak++;
+        }
+        cur = changed ? 1 : cur + 1;
+      } else {
+        cur = 1;
+      }
+      longest = Math.max(longest, cur);
+    }
+
+    var active = EXPERTS.map(function (e, i) {
+      return { i: i, e: e, w: s.isActive(i) ? s.weights[i] : 0, loss: s.losses[i] };
+    }).filter(function (x) {
+      return s.isActive(x.i);
+    });
+    var wsum = 0;
+    active.forEach(function (x) {
+      wsum += x.w;
+    });
+    var leaderboard = active
+      .map(function (x) {
+        return {
+          id: x.e.id,
+          name: x.e.name,
+          line: x.e.line,
+          share: wsum > 0 ? x.w / wsum : 0,
+          loss: x.loss
+        };
+      })
+      .sort(function (x, y) {
+        return y.share - x.share;
+      });
+
+    var breakRate = n ? breaks / n : 0;
+    var accuracy = n ? hits / n : 0;
+
+    // how much better than a coin toss was it? 1/3 is chance with three moves.
+    var verdict;
+    if (accuracy < 0.38) verdict = 'OPAQUE';
+    else if (accuracy < 0.47) verdict = 'SLIPPERY';
+    else if (accuracy < 0.58) verdict = 'READABLE';
+    else verdict = 'OPEN BOOK';
+
+    var verdictLine;
+    if (verdict === 'OPAQUE') verdictLine = 'It never got a grip on you.';
+    else if (verdict === 'SLIPPERY') verdictLine = 'It caught a rhythm now and then.';
+    else if (verdict === 'READABLE') verdictLine = 'It knew what you were about to do.';
+    else verdictLine = 'You handed it the script.';
+
+    return {
+      rounds: n,
+      score: { you: s.score.you, it: s.score.it },
+      breaks: breaks,
+      pushes: n - breaks - hits,
+      coldReads: cold,
+      breakRate: breakRate,
+      accuracy: accuracy,
+      entropy: entropyBits(counts),
+      meanP: mean(
+        r.map(function (x) {
+          return x.p;
+        })
+      ),
+      switchRate: n > 1 ? switches / (n - 1) : 0,
+      switchAfterRead: readCtx ? switchAfterRead / readCtx : null,
+      switchAfterBreak: breakCtx ? switchAfterBreak / breakCtx : null,
+      readCtx: readCtx,
+      breakCtx: breakCtx,
+      longestRun: longest,
+      counts: counts,
+      tells: mineTells(r),
+      leaderboard: leaderboard,
+      verdict: verdict,
+      verdictLine: verdictLine
+    };
+  }
+
+  /* ------------------------------------------------------------------ *
+   * reference players (used by the simulator; handy for demos)
+   * ------------------------------------------------------------------ */
+
+  var PLAYERS = {
+    uniform: function (r, rand) {
+      return Math.floor(rand() * 3);
+    },
+    metronome: function (r) {
+      return r.length % 3;
+    },
+    sticky: function (r, rand) {
+      var a = lastAction(r);
+      if (a === null) return Math.floor(rand() * 3);
+      return rand() < 0.7 ? a : Math.floor(rand() * 3);
+    },
+    contrarian: function (r, rand) {
+      var a = lastAction(r);
+      if (a === null) return Math.floor(rand() * 3);
+      var choices = [0, 1, 2].filter(function (x) {
+        return x !== a;
+      });
+      return choices[Math.floor(rand() * choices.length)];
+    },
+    /** stays after a win, shifts after a loss — the classic gambler */
+    wsls: function (r, rand) {
+      var a = lastAction(r);
+      if (a === null) return Math.floor(rand() * 3);
+      if (r[r.length - 1].outcome === 'break') return a;
+      var choices = [0, 1, 2].filter(function (x) {
+        return x !== a;
+      });
+      return choices[Math.floor(rand() * choices.length)];
+    },
+    /** a rough stand-in for a person: avoids repeats, favours one move */
+    humanish: function (r, rand) {
+      var a = lastAction(r);
+      var w = [0.44, 0.31, 0.25];
+      if (a !== null) w[a] *= 0.18;
+      if (r.length > 2 && a !== null && r[r.length - 1].a !== r[r.length - 2].a) {
+        w[r[r.length - 1].a] *= 0.6;
+      }
+      var s = w[0] + w[1] + w[2];
+      var x = rand() * s;
+      if (x < w[0]) return 0;
+      if (x < w[0] + w[1]) return 1;
+      return 2;
+    }
+  };
+
+  /* ------------------------------------------------------------------ *
+   * exports
+   * ------------------------------------------------------------------ */
+
+  var Tell = {
+    N: N,
+    UNIFORM: UNIFORM,
+    GLYPHS: GLYPHS,
+    NAMES: NAMES,
+    EXPERTS: EXPERTS,
+    ACTS: ACTS,
+    PLAYERS: PLAYERS,
+    rng: rng,
+    norm: norm,
+    clipNorm: clipNorm,
+    argmaxIdx: argmaxIdx,
+    entropyBits: entropyBits,
+    pipsOf: pipsOf,
+    actFor: actFor,
+    actIndexFor: actIndexFor,
+    clampRounds: clampRounds,
+    MIN_ROUNDS: MIN_ROUNDS,
+    MAX_ROUNDS: MAX_ROUNDS,
+    Session: Session,
+    mineTells: mineTells,
+    summarise: summarise
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = Tell;
+  root.Tell = Tell;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/* TELL — the UI. Plain DOM, no build step, no dependencies. */
+(function () {
+  'use strict';
+
+  var T = window.Tell;
+  var G = T.GLYPHS;
+  var NAMES = T.NAMES;
+
+  var el = {};
+  ['roundNum', 'roundTotal', 'scoreYou', 'scoreIt', 'actName', 'actNote', 'actLine', 'glyph',
+    'pips', 'whisper', 'board', 'boardLabel', 'bars', 'keys', 'say', 'ribbon', 'roundsPick',
+    'roundsPickEnd', 'over', 'verdict', 'verdictLine', 'stats', 'tells', 'theories', 'again',
+    'copy', 'mind', 'card'].forEach(function (id) {
+    el[id] = document.getElementById(id);
+  });
+
+  var PRESET_ROUNDS = [10, 20, 30, 50];
+
+  function roundsFromUrl() {
+    var v = null;
+    try {
+      v = new URLSearchParams(window.location.search).get('rounds');
+    } catch (e) {
+      v = null;
+    }
+    return T.clampRounds(v == null ? 30 : v);
+  }
+
+  var session = null;
+  var phase = 'watch';
+  var seed = (Date.now() ^ 0x5f3759df) >>> 0;
+  var timers = [];
+  var lastAct = null;
+  var lastReport = null;
+  var mindOn = false;
+  var rounds = roundsFromUrl();
+  var pendingRounds = 0;
+
+  /* ---------------- timing ---------------- */
+
+  function later(fn, ms) {
+    timers.push(setTimeout(fn, ms));
+  }
+
+  function clearTimers() {
+    timers.forEach(clearTimeout);
+    timers = [];
+  }
+
+  /* ---------------- helpers ---------------- */
+
+  function pct(x) {
+    return Math.round(x * 100) + '%';
+  }
+
+  function pct1(x) {
+    return (Math.round(x * 1000) / 10).toFixed(1) + '%';
+  }
+
+  function confidenceWord(pips) {
+    return ['it has no read', 'a guess', 'a hunch', 'fairly sure', 'confident', 'it is sure'][pips];
+  }
+
+  function setSay(text, cls) {
+    el.say.textContent = text;
+    el.say.className = 'say' + (cls ? ' ' + cls : '');
+  }
+
+  function setKeys(enabled) {
+    Array.prototype.forEach.call(el.keys.children, function (b) {
+      if (enabled) b.removeAttribute('disabled');
+      else b.setAttribute('disabled', '');
+    });
+  }
+
+  /* ---------------- game lifecycle ---------------- */
+
+  function newGame() {
+    clearTimers();
+    pendingRounds = 0;
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    session = new T.Session({ seed: seed, maxRounds: rounds });
+    phase = 'watch';
+    lastAct = null;
+    lastReport = null;
+    el.over.hidden = true;
+    el.card.scrollTop = 0;
+    el.roundTotal.textContent = String(session.maxRounds);
+
+    if (el.ribbon.children.length !== session.maxRounds) {
+      el.ribbon.innerHTML = '';
+      for (var i = 0; i < session.maxRounds; i++) {
+        var tick = document.createElement('div');
+        el.ribbon.appendChild(tick);
+      }
+    }
+    Array.prototype.forEach.call(el.ribbon.children, function (t) {
+      t.className = 'tick';
+    });
+
+    renderScores();
+    startRound();
+  }
+
+  /* ---------------- round count ---------------- */
+
+  function buildRoundsPickers() {
+    // presets plus the length currently in play; other one-offs drop away
+    var lens = PRESET_ROUNDS.slice();
+    if (lens.indexOf(rounds) === -1) lens.push(rounds);
+    lens.sort(function (a, b) {
+      return a - b;
+    });
+    [el.roundsPick, el.roundsPickEnd].forEach(function (host) {
+      if (!host) return;
+      host.innerHTML = '<span class="rlab">ROUNDS</span>';
+      lens.forEach(function (n) {
+        var b = document.createElement('button');
+        b.className = 'rpill';
+        b.type = 'button';
+        b.dataset.n = String(n);
+        b.textContent = String(n);
+        host.appendChild(b);
+      });
+      var or = document.createElement('span');
+      or.className = 'ror';
+      or.textContent = 'or';
+      host.appendChild(or);
+      var input = document.createElement('input');
+      input.className = 'rnum';
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.autocomplete = 'off';
+      input.placeholder = 'any #';
+      input.maxLength = 3;
+      input.setAttribute('aria-label', 'custom number of rounds (' + T.MIN_ROUNDS + ' to ' + T.MAX_ROUNDS + ')');
+      input.title = 'any number from ' + T.MIN_ROUNDS + ' to ' + T.MAX_ROUNDS + ', then Enter';
+      input.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter') {
+          ev.preventDefault();
+          submitCustomRounds(input);
+        } else if (ev.key === 'Escape') {
+          input.value = '';
+          input.blur();
+        }
+      });
+      input.addEventListener('blur', function () {
+        if (input.value.trim()) submitCustomRounds(input);
+      });
+      host.appendChild(input);
+    });
+    syncRoundsPills();
+  }
+
+  function submitCustomRounds(input) {
+    var raw = input.value.trim();
+    if (!raw) return;
+    var n = Number(raw);
+    if (!isFinite(n) || n <= 0) {
+      input.value = '';
+      return;
+    }
+    if (chooseRounds(n)) input.value = '';
+  }
+
+  function syncRoundsPills() {
+    Array.prototype.forEach.call(document.querySelectorAll('.rpill'), function (b) {
+      b.classList.toggle('on', Number(b.dataset.n) === rounds);
+      b.setAttribute('aria-pressed', Number(b.dataset.n) === rounds ? 'true' : 'false');
+    });
+  }
+
+  function applyRounds(n) {
+    rounds = T.clampRounds(n);
+    buildRoundsPickers();
+    newGame();
+  }
+
+  /**
+   * Mid-game changes ask for a second confirmation rather than throwing the
+   * game away. Returns true when the game was actually restarted.
+   */
+  function chooseRounds(n) {
+    n = T.clampRounds(n);
+    var inPlay = session && session.rounds.length > 0 && !session.isOver();
+    if (inPlay && n === rounds) return false; // already this length
+    if (inPlay) {
+      if (pendingRounds === n) {
+        applyRounds(n);
+        return true;
+      }
+      pendingRounds = n;
+      setSay('restart at ' + n + ' rounds? click again', 'gold');
+      later(function () {
+        pendingRounds = 0;
+        if (phase === 'watch') setSay('pick a move. it has already committed.', '');
+      }, 4000);
+      return false;
+    }
+    applyRounds(n);
+    return true;
+  }
+
+  function startRound() {
+    if (session.isOver()) return finish();
+
+    phase = 'watch';
+    session.predict();
+
+    var t = session.rounds.length;
+    var act = T.actFor(t, session.maxRounds);
+    var freshAct = act.label !== lastAct;
+    lastAct = act.label;
+
+    el.roundNum.textContent = String(t + 1).padStart(2, '0');
+    el.actName.textContent = act.label;
+    el.actNote.textContent = act.note;
+    el.board.classList.remove('reading');
+    el.actLine.classList.remove('flash');
+    setKeys(false);
+
+    // the machine thinks before it commits; you get its confidence, not its guess
+    el.boardLabel.textContent = 'THE MACHINE IS READING YOU';
+    el.glyph.className = 'glyph idle';
+    el.glyph.textContent = '◎';
+    el.whisper.textContent = 'reading you';
+    renderPips(0);
+
+    later(function () {
+      var pred = session.predict();
+      el.whisper.textContent = confidenceWord(pred.pips);
+      renderPips(pred.pips);
+      setKeys(true);
+      if (freshAct) {
+        setSay(act.label + ' · ' + act.note, 'gold');
+        el.actLine.classList.add('flash');
+      } else if (!pendingRounds) {
+        // don't wipe a pending "restart at N rounds?" prompt
+        setSay('pick a move. it has already committed.', '');
+      }
+      renderMind();
+    }, 420);
+
+    // clear last round's bars
+    Array.prototype.forEach.call(el.bars.children, function (b) {
+      b.classList.remove('pick');
+      var f = b.querySelector('.fill');
+      f.className = 'fill';
+      f.style.width = '0%';
+      b.querySelector('.pv').textContent = '';
+    });
+  }
+
+  function choose(a) {
+    if (phase !== 'watch' || !session) return;
+    phase = 'reveal';
+    clearTimers();
+    setKeys(false);
+
+    var r = session.play(a);
+    el.boardLabel.textContent = 'IT WAS WATCHING';
+    el.glyph.className = 'glyph beat';
+    el.glyph.textContent = G[r.shown];
+    renderScores();
+    renderBars(r);
+    renderRibbon();
+
+    el.board.classList.toggle('reading', r.outcome === 'read');
+    el.glyph.classList.remove('beat');
+
+    if (r.outcome === 'break') {
+      if (r.points === 2) {
+        setSay('COLD READ  ·  it gave that ' + pct1(r.p) + '  ·  +2', 'gold');
+        el.whisper.textContent = 'that was not in its model of you';
+      } else {
+        setSay('you slip past it  ·  it gave that ' + pct1(r.p) + '  ·  +1', 'good');
+        el.whisper.textContent = 'a hole in the read';
+      }
+    } else if (r.outcome === 'read') {
+      setSay('READ  ·  it had that move at ' + pct1(r.p), 'bad');
+      el.whisper.textContent = 'it called you';
+    } else {
+      setSay('dead heat  ·  it could not choose between them', '');
+      el.whisper.textContent = 'close, but it did not call it';
+    }
+
+    renderMind();
+    later(function () {
+      startRound();
+    }, r.points === 2 ? 1900 : 1550);
+  }
+
+  function finish() {
+    phase = 'over';
+    var rep = T.summarise(session);
+    lastReport = rep;
+    renderScores();
+    renderOver(rep);
+  }
+
+  /* ---------------- rendering ---------------- */
+
+  function renderScores() {
+    el.scoreYou.textContent = String(session.score.you);
+    el.scoreIt.textContent = String(session.score.it);
+    if (session.isOver()) el.roundNum.textContent = String(session.maxRounds);
+  }
+
+  function renderPips(n) {
+    el.pips.innerHTML = '';
+    for (var i = 0; i < 5; i++) {
+      var d = document.createElement('span');
+      d.className = 'pip' + (i < n ? ' on' : '');
+      el.pips.appendChild(d);
+    }
+  }
+
+  function renderBars(r) {
+    var maxScale = 0.9;
+    for (var i = 0; i < 3; i++) {
+      var bar = el.bars.children[i];
+      var fill = bar.querySelector('.fill');
+      var pv = bar.querySelector('.pv');
+      fill.style.width = Math.min(100, (r.probs[i] / maxScale) * 100).toFixed(1) + '%';
+      pv.textContent = pct(r.probs[i]);
+      bar.classList.toggle('pick', i === r.a);
+      if (i === r.a) fill.className = 'fill ' + r.outcome;
+    }
+  }
+
+  function renderRibbon() {
+    for (var i = 0; i < session.rounds.length; i++) {
+      var r = session.rounds[i];
+      var cell = el.ribbon.children[i];
+      cell.className = 'tick ' + (r.outcome === 'push' ? 'push' : r.outcome === 'read' ? 'read' : r.points === 2 ? 'cold' : 'break');
+      cell.title = 'round ' + (i + 1) + ': ' + NAMES[r.a] + ' — ' +
+        (r.outcome === 'break' ? 'broken' : r.outcome === 'push' ? 'dead heat' : 'read');
+    }
+  }
+
+  function renderMind() {
+    if (!mindOn) return;
+    var pred = session.pending;
+    var rows = [];
+    var total = 0;
+    var i;
+    for (i = 0; i < T.EXPERTS.length; i++) {
+      if (session.isActive(i)) total += session.weights[i];
+    }
+    for (i = 0; i < T.EXPERTS.length; i++) {
+      var e = T.EXPERTS[i];
+      var active = session.isActive(i);
+      var share = active && total > 0 ? session.weights[i] / total : 0;
+      rows.push(
+        '<tr class="' + (active ? '' : 'off') + '"><td class="n">' + e.name + '</td>' +
+        '<td>' + (active ? pct(share) : '—') + '</td>' +
+        '<td class="w">' + (active ? session.losses[i].toFixed(2) : '') + '</td></tr>'
+      );
+    }
+    el.mind.innerHTML =
+      '<div style="margin-bottom:6px;color:#8b95a5">hedge over theories · weight / cumulative log loss</div>' +
+      '<table>' + rows.join('') + '</table>' +
+      (pred
+        ? '<div style="margin-top:8px;color:#8b95a5">p = ' +
+          pred.probs.map(function (p) {
+            return p.toFixed(3);
+          }).join(' / ') + '</div>'
+        : '');
+  }
+
+  function renderOver(rep) {
+    el.verdict.textContent = rep.verdict;
+    el.verdict.className = rep.verdict === 'OPAQUE' ? 'opaque' : rep.verdict === 'OPEN BOOK' ? 'open' : '';
+    el.verdictLine.textContent = rep.verdictLine;
+
+    var called = Math.round(rep.accuracy * rep.rounds);
+    el.stats.innerHTML = [
+      ['IT CALLED YOU', called + '<small>/' + rep.rounds + '</small>'],
+      ['YOUR BREAKS', rep.breaks + '<small> · ' + pct(rep.breakRate) + '</small>'],
+      ['COLD READS', String(rep.coldReads)],
+      ['ENTROPY', rep.entropy.toFixed(2) + '<small> bits/round</small>'],
+      ['MEAN READ', pct(rep.meanP)],
+      ['LONGEST RUN', String(rep.longestRun)]
+    ]
+      .map(function (s) {
+        return '<div class="stat"><div class="k">' + s[0] + '</div><div class="v">' + s[1] + '</div></div>';
+      })
+      .join('');
+
+    if (rep.tells.length) {
+      el.tells.innerHTML = rep.tells
+        .map(function (t) {
+          return (
+            '<li title="' + t.lift.toFixed(1) + '× your base rate for this move">' +
+            '<span class="t">' + t.label + ' <em>' + G[t.action] + '</em></span>' +
+            '<span class="q">' + pct(t.share) + ' of ' + t.n + '</span></li>'
+          );
+        })
+        .join('');
+    } else {
+      el.tells.innerHTML = '<li><span class="t">no stable tell — nothing repeated often enough to stick.</span></li>';
+    }
+
+    el.theories.innerHTML = rep.leaderboard
+      .slice(0, 4)
+      .map(function (e) {
+        return (
+          '<div class="th"><span class="tn">' + e.name + '</span>' +
+          '<span class="track"><span class="fill" style="width:' + pct(e.share) + '"></span></span>' +
+          '<span class="pc">' + pct(e.share) + '</span></div>'
+        );
+      })
+      .join('');
+
+    el.over.hidden = false;
+    el.over.scrollTop = 0;
+  }
+
+  /* ---------------- report text ---------------- */
+
+  function reportText(rep) {
+    var lines = [];
+    lines.push('TELL — session report');
+    lines.push('verdict: ' + rep.verdict + ' — ' + rep.verdictLine);
+    lines.push('score: you ' + rep.score.you + ' — it ' + rep.score.it);
+    lines.push('it called your move ' + Math.round(rep.accuracy * rep.rounds) + ' of ' + rep.rounds + ' times');
+    lines.push('breaks: ' + rep.breaks + ' (' + pct(rep.breakRate) + '), cold reads: ' + rep.coldReads +
+      ', dead heats: ' + rep.pushes);
+    lines.push('entropy: ' + rep.entropy.toFixed(2) + ' bits/round, mean read: ' + pct(rep.meanP));
+    lines.push('longest run: ' + rep.longestRun + ', switch after a read: ' +
+      (rep.switchAfterRead === null ? 'n/a' : pct(rep.switchAfterRead)) +
+      ', switch after a break: ' + (rep.switchAfterBreak === null ? 'n/a' : pct(rep.switchAfterBreak)));
+    if (rep.tells.length) {
+      lines.push('tells:');
+      rep.tells.forEach(function (t) {
+        lines.push('  - ' + t.label + ' ' + G[t.action] + ' — ' + pct(t.share) + ' of ' + t.n + ' (' + t.lift.toFixed(1) + 'x base rate)');
+      });
+    } else {
+      lines.push('tells: none found');
+    }
+    lines.push('theories:');
+    rep.leaderboard.forEach(function (e) {
+      lines.push('  - ' + e.name + ': ' + pct(e.share));
+    });
+    return lines.join('\n');
+  }
+
+  function copyReport() {
+    if (!lastReport) return;
+    var txt = reportText(lastReport);
+    var done = function () {
+      el.copy.textContent = 'COPIED';
+      later(function () {
+        el.copy.textContent = 'COPY REPORT';
+      }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try {
+        ok = document.execCommand('copy');
+      } catch (e) {
+        ok = false;
+      }
+      document.body.removeChild(ta);
+      if (ok) {
+        done();
+      } else {
+        el.copy.textContent = 'NO CLIPBOARD';
+        later(function () {
+          el.copy.textContent = 'COPY REPORT';
+        }, 1600);
+      }
+    }
+  }
+
+  /* ---------------- events ---------------- */
+
+  el.keys.addEventListener('click', function (ev) {
+    var btn = ev.target.closest ? ev.target.closest('.key') : null;
+    if (!btn) return;
+    choose(Number(btn.dataset.a));
+  });
+
+  el.again.addEventListener('click', function () {
+    applyRounds(rounds);
+  });
+  el.copy.addEventListener('click', copyReport);
+
+  [el.roundsPick, el.roundsPickEnd].forEach(function (host) {
+    if (!host) return;
+    host.addEventListener('click', function (ev) {
+      var b = ev.target.closest ? ev.target.closest('.rpill') : null;
+      if (b) chooseRounds(Number(b.dataset.n));
+    });
+  });
+
+  // small hook for testing and for the curious: window.TELL_DEBUG.session()
+  window.TELL_DEBUG = {
+    seed: function () {
+      return seed;
+    },
+    session: function () {
+      return session;
+    }
+  };
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    var tag = (ev.target && ev.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    var k = ev.key;
+    if (k === '1' || k === '2' || k === '3') {
+      ev.preventDefault();
+      choose(Number(k) - 1);
+    } else if (k === 'd' || k === 'D') {
+      mindOn = !mindOn;
+      el.mind.classList.toggle('on', mindOn);
+      renderMind();
+    } else if ((k === 'r' || k === 'R') && phase === 'over') {
+      newGame();
+    } else if (k === ' ' && phase === 'reveal') {
+      ev.preventDefault();
+      clearTimers();
+      startRound();
+    }
+  });
+
+  buildRoundsPickers();
+  newGame();
+})();
+</script>
+</body>
+</html>

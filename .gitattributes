@@ -1,0 +1,3 @@
+# Serve the built files byte-for-byte. Git's autocrlf rewrites CRLF on commit,
+# which silently changes the payload of a self-contained game build.
+* -text

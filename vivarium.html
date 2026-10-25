@@ -1,0 +1,1892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIVARIUM — a MAP-Elites level archive</title>
+<style>
+:root {
+  --bg: #070a0c;
+  --panel: #0d1215;
+  --panel2: #11171b;
+  --line: #1e282e;
+  --ink: #e8f0ee;
+  --mute: #8fa2a2;
+  --dim: #5a6d6d;
+  --mint: #7ee0c2;
+  --mint-dim: #2c5a4e;
+  --amber: #f2c14e;
+  --red: #e8654f;
+  --blue: #6fb2e8;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 500px at 70% -10%, #0e1a1a 0%, transparent 60%),
+    radial-gradient(600px 400px at 0% 100%, #0c1418 0%, transparent 55%),
+    var(--bg);
+}
+
+/* ---------------- header ---------------- */
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 26px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand { display: flex; align-items: baseline; gap: 9px; }
+.mark { color: var(--mint); font-size: 20px; }
+.name { font-weight: 700; letter-spacing: 0.22em; font-size: 15px; }
+
+.tagline {
+  color: var(--dim);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  flex: 1;
+}
+
+.tabs { display: flex; gap: 6px; }
+
+.tab {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--mute);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  padding: 7px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); border-color: #2c3a40; }
+.tab.on { color: var(--bg); background: var(--mint); border-color: var(--mint); font-weight: 700; }
+
+/* ---------------- layout ---------------- */
+
+main {
+  display: grid;
+  grid-template-columns: 344px minmax(0, 1fr);
+  gap: 18px;
+  padding: 18px 26px 30px;
+  max-width: 1220px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.panel { display: flex; flex-direction: column; gap: 14px; }
+
+.block {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 13px 14px 14px;
+}
+
+.ph {
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: var(--mute);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.phnote { color: #748787; letter-spacing: 0.05em; font-size: 10.5px; }
+
+.stat { display: flex; justify-content: space-between; align-items: baseline; }
+.stat span { color: var(--dim); font-size: 11px; letter-spacing: 0.06em; }
+.stat b { font: 600 15px/1 ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--mint); }
+
+.bar {
+  height: 4px;
+  background: #131b1f;
+  border-radius: 2px;
+  margin: 8px 0 12px;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--mint-dim), var(--mint));
+  transition: width 0.25s ease;
+}
+
+.triple {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.triple div { border-left: 1px solid var(--line); padding-left: 8px; }
+.triple div:first-child { border-left: 0; padding-left: 0; }
+.triple span { display: block; color: #748787; font-size: 10.5px; letter-spacing: 0.07em; }
+.triple b { font: 600 13px/1.5 ui-monospace, Consolas, monospace; }
+
+.ctl { display: block; }
+.ctl .lab {
+  display: flex;
+  justify-content: space-between;
+  color: var(--mute);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  margin-bottom: 5px;
+}
+.ctl .lab b { color: var(--ink); letter-spacing: 0; font: 600 11px ui-monospace, Consolas, monospace; }
+.ctl input[type=range] { width: 100%; accent-color: var(--mint); }
+.ctl .hint { display: block; color: #6d7f7f; font-size: 11px; margin-top: 4px; }
+
+/* ---------------- map ---------------- */
+
+.mapblock { padding-bottom: 10px; }
+
+#map {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #0a0f12;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+.axes {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
+  color: #748787;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+.axes .y { text-align: right; }
+
+.hoverline {
+  margin-top: 8px;
+  min-height: 15px;
+  color: var(--mute);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+/* ---------------- stage ---------------- */
+
+.stage { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+.canvaswrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #080c0e;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#game { display: block; width: 100%; height: 100%; }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(420px 260px at 50% 45%, rgba(8, 12, 14, 0.55), rgba(8, 12, 14, 0.86));
+  padding: 30px;
+  text-align: center;
+  transition: opacity 0.18s ease;
+}
+.overlay.hide { opacity: 0; pointer-events: none; }
+
+.ov { max-width: 430px; }
+.ovk {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  color: var(--mint);
+  margin-bottom: 10px;
+}
+.ovt { color: var(--ink); font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
+.ova { color: #7d9090; font-size: 12px; letter-spacing: 0.03em; }
+
+.hud {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  gap: 18px;
+  padding: 10px 14px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(8, 12, 14, 0.92), rgba(8, 12, 14, 0));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.hud.on { opacity: 1; }
+.hudcell span { display: block; font-size: 9.5px; color: #7d9090; }
+.hudcell b { font: 600 13px ui-monospace, Consolas, monospace; color: var(--ink); }
+.hudcell.lives b { letter-spacing: 3px; color: var(--mint); }
+
+.under {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 12px 14px;
+  min-height: 74px;
+}
+
+.exname {
+  font-size: 17px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.exsub { color: var(--dim); font-size: 11.5px; margin-top: 3px; letter-spacing: 0.02em; }
+
+.result { text-align: right; min-width: 210px; }
+.rtitle { font: 600 15px ui-monospace, Consolas, monospace; color: var(--mute); }
+.rtitle.good { color: var(--mint); }
+.rtitle.bad { color: var(--red); }
+.rline { color: #7d9090; font-size: 11.5px; margin-top: 2px; min-height: 14px; }
+.rbtns { display: flex; gap: 6px; justify-content: flex-end; margin-top: 8px; }
+
+button.act {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--mute);
+  font: inherit;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  padding: 6px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+button.act:hover { color: var(--ink); border-color: #33444a; }
+button.act.primary { border-color: var(--mint-dim); color: var(--mint); }
+button.act.primary:hover { background: var(--mint); color: var(--bg); }
+
+/* ---------------- curriculum ---------------- */
+
+.curriculum {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 12px 14px 14px;
+}
+.curriculumrow { display: flex; gap: 18px; align-items: center; justify-content: space-between; }
+.curriculumtext { color: var(--mute); font-size: 12.5px; line-height: 1.55; max-width: 560px; }
+.curriculumtext b { color: var(--ink); font-weight: 600; }
+.curriculumtext em { color: var(--mint); font-style: normal; }
+.sparkwrap { flex: 0 0 170px; }
+.spark { height: 40px; }
+.sparkcap { color: #6d7f7f; font-size: 9.5px; letter-spacing: 0.04em; margin-top: 3px; text-align: right; }
+.curriculumrow button.act { flex: 0 0 auto; }
+.spark canvas { width: 100%; height: 100%; display: block; }
+
+body[data-view="archive"] .curriculum { display: none; }
+
+@media (min-width: 901px) {
+  .canvaswrap { width: min(100%, calc(100vh - 330px)); margin: 0 auto; }
+}
+
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; padding: 14px; }
+  .top { flex-wrap: wrap; padding: 14px; }
+  .tagline { flex-basis: 100%; order: 3; }
+  .under { grid-template-columns: 1fr; }
+  .result { text-align: left; min-width: 0; }
+  .rbtns { justify-content: flex-start; }
+}
+</style>
+</head>
+<body data-view="archive">
+<header class="top">
+  <div class="brand">
+    <span class="mark">◍</span>
+    <span class="name">VIVARIUM</span>
+  </div>
+  <div class="tagline">every cell is a level, evolved for how it feels</div>
+  <nav class="tabs">
+    <button class="tab on" data-view="archive">ARCHIVE</button>
+    <button class="tab" data-view="curriculum">CURRICULUM</button>
+  </nav>
+</header>
+
+<main>
+  <aside class="panel">
+    <section class="block">
+      <div class="ph">THE SEARCH</div>
+      <div class="stat">
+        <span>coverage</span>
+        <b id="coverage">0 / 256</b>
+      </div>
+      <div class="bar"><i id="coverageBar"></i></div>
+      <div class="triple">
+        <div><span>evaluations</span><b id="evals">0</b></div>
+        <div><span>qd score</span><b id="qd">0.0</b></div>
+        <div><span>your rate</span><b id="rate">—</b></div>
+      </div>
+      <label class="ctl">
+        <span class="lab">SEARCH <b id="speedVal">8×</b></span>
+        <input id="speed" type="range" min="0" max="3" step="1" value="2">
+        <span class="hint">off, 4, 8, 20 ms per frame</span>
+      </label>
+    </section>
+
+    <section class="block mapblock">
+      <div class="ph">THE MAP <span class="phnote" id="mapNote">live</span></div>
+      <canvas id="map" width="320" height="320" aria-label="map of levels"></canvas>
+      <div class="axes">
+        <span class="ax x">how close it keeps you →</span>
+        <span class="ax y">↑ how many hunters</span>
+      </div>
+      <div class="hoverline" id="hoverline">click a cell to play it</div>
+    </section>
+  </aside>
+
+  <section class="stage">
+    <div class="canvaswrap">
+      <canvas id="game" width="720" height="720" aria-label="the level"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="ov">
+          <div class="ovk">THE ARCHIVE IS FILLING</div>
+          <div class="ovt">no clock: close on a hunter until your ring fills, spend the charge on a mote, and clear it at your own pace</div>
+          <div class="ova">click any filled cell · the search is already at work</div>
+        </div>
+      </div>
+      <div class="hud" id="hud">
+        <div class="hudcell"><span>MOTES</span><b id="hudMotes">0/0</b></div>
+        <div class="hudcell"><span>CHARGE</span><b id="hudCharge">0%</b></div>
+        <div class="hudcell"><span>TIME</span><b id="hudTime">0.0</b></div>
+        <div class="hudcell lives"><span>SHELLS</span><b id="hudLives"></b></div>
+      </div>
+    </div>
+
+    <div class="under">
+      <div class="level">
+        <div class="levelname" id="levelName">—</div>
+        <div class="levelsub" id="levelSub">pick something from the map</div>
+      </div>
+      <div class="result" id="result">
+        <div class="rtitle">—</div>
+        <div class="rline"></div>
+        <div class="rbtns" id="rbtns"></div>
+      </div>
+    </div>
+
+    <div class="curriculum" id="curriculum">
+      <div class="ph">CURRICULUM <span class="phnote" id="curriculumNote">selection record</span></div>
+      <div class="curriculumrow">
+        <div class="curriculumtext" id="curriculumText">play a few levels and the selector will start choosing for you.</div>
+        <div class="sparkwrap">
+          <div class="spark" id="spark"></div>
+          <div class="sparkcap">rolling clear rate · dashed = 0.85</div>
+        </div>
+        <button class="act primary" id="nextBtn">NEXT LEVEL</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* VIVARIUM — the micro-world engine.
+ *
+ * A level is six genes. A run is twenty-odd seconds of physics: you collect
+ * motes, drifters hunt you, thorns sit still. Everything is deterministic given
+ * (genes, seed), which is what lets the search evaluate thousands of worlds a
+ * second and lets a test assert a trajectory.
+ */
+(function (root) {
+  'use strict';
+
+  /* ---------------- genes ---------------- */
+
+  const GENE_SPECS = {
+    sparks:   { kind: 'int',   min: 3,    max: 10,   label: 'motes' },
+    drifters: { kind: 'int',   min: 1,    max: 6,    label: 'drifters' },
+    hunt:     { kind: 'float', min: 0.48, max: 0.84, label: 'drifter speed' },
+    turn:     { kind: 'float', min: 1.2,  max: 7.0,  label: 'steering' },
+    thorns:   { kind: 'int',   min: 0,    max: 5,    label: 'thorns' },
+    wander:   { kind: 'float', min: 0,    max: 1.0,  label: 'wander' },
+  };
+  const GENE_KEYS = Object.keys(GENE_SPECS);
+
+  const C = {
+    speed: 0.42,        // player top speed, arena units per second
+    playerR: 0.018,
+    drifterR: 0.020,
+    sparkR: 0.013,
+    thornR: 0.019,
+    grazeR: 0.125,      // proximity that feeds charge
+    chargeGain: 1.5,    // charge per second at the rim of the graze radius
+    chargeEdge: 1.6,    // extra charge per second at zero distance
+    chargeGrace: 0.4,   // seconds the charge holds after leaving the radius
+    chargeLoss: 0.30,   // decay per second once the grace has run out
+    accel: 14,          // player velocity smoothing (1/s)
+    dt: 1 / 60,
+    guardSeconds: 120,  // safety stop for a headless run, not a game rule
+  };
+
+  /* ---------------- rng ---------------- */
+
+  function mulberry32(a) {
+    let s = a | 0;
+    return function () {
+      s = (s + 0x6D2B79F5) | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------------- genes: clamp, sample, mutate ---------------- */
+
+  function clampGene(key, v) {
+    const s = GENE_SPECS[key];
+    if (!Number.isFinite(v)) v = s.min;
+    v = Math.min(s.max, Math.max(s.min, v));
+    if (s.kind === 'int') v = Math.round(v);
+    return v;
+  }
+
+  function normaliseGenes(genes) {
+    const out = {};
+    for (const k of GENE_KEYS) out[k] = clampGene(k, genes && genes[k] != null ? genes[k] : GENE_SPECS[k].min);
+    return out;
+  }
+
+  function sampleGenes(rnd) {
+    const g = {};
+    for (const k of GENE_KEYS) {
+      const s = GENE_SPECS[k];
+      let v = s.min + rnd() * (s.max - s.min);
+      if (s.kind === 'int') v = Math.round(v);
+      g[k] = clampGene(k, v);
+    }
+    return g;
+  }
+
+  /* Mutate in normalised gene space so every gene moves on a comparable scale. */
+  function mutateGenes(genes, rnd, sigma) {
+    sigma = sigma == null ? 0.09 : sigma;
+    const g = normaliseGenes(genes);
+    const out = {};
+    for (const k of GENE_KEYS) {
+      const s = GENE_SPECS[k];
+      const span = s.max - s.min;
+      let v = g[k] + gauss(rnd) * sigma * span;
+      if (rnd() < 0.08) v = s.min + rnd() * span; // occasional full jump out of a basin
+      out[k] = clampGene(k, v);
+    }
+    return out;
+  }
+
+  function gauss(rnd) {
+    let u = 0, v = 0;
+    while (u === 0) u = rnd();
+    while (v === 0) v = rnd();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function genesKey(g) {
+    return GENE_KEYS.map((k) => (GENE_SPECS[k].kind === 'int' ? g[k] | 0 : g[k].toFixed(4))).join(':');
+  }
+
+  function hashString(s) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  /* ---------------- world ---------------- */
+
+  const TAU = Math.PI * 2;
+
+  function createWorld(genes, seed) {
+    const g = normaliseGenes(genes);
+    const rnd = mulberry32((seed | 0) ^ hashString(genesKey(g)));
+    const w = {
+      genes: g,
+      seed: seed | 0,
+      t: 0,
+      state: 'play',          // play | clear | dead | stalled
+      px: 0.5, py: 0.5, pvx: 0, pvy: 0,
+      drifters: [],
+      sparks: [],
+      thorns: [],
+      collected: 0,
+      charge: 0,
+      graceLeft: 0,
+      refDist: 0,
+      lastX: 0.5, lastY: 0.5,
+      lives: 2,
+      invuln: 0,
+      steps: 0,
+      heatSum: 0,
+      crowdSum: 0,
+      speedSum: 0,
+      grazeEpisodes: 0,
+      inGraze: false,
+      endT: 0,
+      events: [],
+    };
+
+    /* drifters start on a ring, evenly spread with a little jitter */
+    const n = g.drifters;
+    for (let i = 0; i < n; i++) {
+      const ang = (i / n) * TAU + (rnd() - 0.5) * 0.7;
+      const rad = 0.30 + rnd() * 0.12;
+      w.drifters.push({
+        x: 0.5 + Math.cos(ang) * rad,
+        y: 0.5 + Math.sin(ang) * rad,
+        vx: 0, vy: 0,
+        phase: rnd() * TAU,
+        freq: 0.7 + rnd() * 1.6,
+      });
+    }
+
+    /* thorns: static, away from the centre and from each other */
+    for (let i = 0; i < g.thorns; i++) {
+      let x = 0, y = 0, ok = false;
+      for (let tries = 0; tries < 80 && !ok; tries++) {
+        x = 0.08 + rnd() * 0.84;
+        y = 0.08 + rnd() * 0.84;
+        ok = Math.hypot(x - 0.5, y - 0.5) > 0.14 && w.thorns.every((th) => Math.hypot(th.x - x, th.y - y) > 0.13);
+      }
+      w.thorns.push({ x, y });
+    }
+
+    /* sparks: spread out, clear of thorns and of the drifters' start ring */
+    for (let i = 0; i < g.sparks; i++) {
+      let x = 0.5, y = 0.5, ok = false;
+      for (let tries = 0; tries < 120 && !ok; tries++) {
+        x = 0.07 + rnd() * 0.86;
+        y = 0.07 + rnd() * 0.86;
+        ok = w.thorns.every((th) => Math.hypot(th.x - x, th.y - y) > 0.10) &&
+             w.sparks.every((sp) => Math.hypot(sp.x - x, sp.y - y) > 0.11) &&
+             Math.hypot(x - 0.5, y - 0.5) > 0.05;
+      }
+      w.sparks.push({ x, y, taken: false });
+    }
+
+    return w;
+  }
+
+  /* ---------------- simulation ---------------- */
+
+  function step(w, input, dt) {
+    if (w.state !== 'play') return w;
+    dt = dt == null ? C.dt : dt;
+    w.t += dt;
+    w.steps++;
+    if (w.invuln > 0) w.invuln = Math.max(0, w.invuln - dt);
+
+    /* player: smooth acceleration towards the requested direction */
+    let ix = input && input.x ? input.x : 0;
+    let iy = input && input.y ? input.y : 0;
+    const im = Math.hypot(ix, iy);
+    if (im > 1) { ix /= im; iy /= im; }
+    const k = 1 - Math.exp(-C.accel * dt);
+    w.pvx += (ix * C.speed - w.pvx) * k;
+    w.pvy += (iy * C.speed - w.pvy) * k;
+    w.px += w.pvx * dt;
+    w.py += w.pvy * dt;
+
+    /* walls: clamp, kill the normal velocity */
+    if (w.px < C.playerR) { w.px = C.playerR; if (w.pvx < 0) w.pvx = 0; }
+    if (w.px > 1 - C.playerR) { w.px = 1 - C.playerR; if (w.pvx > 0) w.pvx = 0; }
+    if (w.py < C.playerR) { w.py = C.playerR; if (w.pvy < 0) w.pvy = 0; }
+    if (w.py > 1 - C.playerR) { w.py = 1 - C.playerR; if (w.pvy > 0) w.pvy = 0; }
+
+    /* drifters: homing with optional sinusoidal wander across the chase line */
+    const spd = C.speed * w.genes.hunt;
+    for (const d of w.drifters) {
+      let dx = w.px - d.x, dy = w.py - d.y;
+      const dist = Math.hypot(dx, dy) || 1e-6;
+      dx /= dist; dy /= dist;
+      let vx = dx, vy = dy;
+      if (w.genes.wander > 0) {
+        const wob = w.genes.wander * 0.9 * Math.sin(w.t * d.freq + d.phase);
+        vx = dx - dy * wob;
+        vy = dy + dx * wob;
+        const m = Math.hypot(vx, vy) || 1;
+        vx /= m; vy /= m;
+      }
+      const kk = 1 - Math.exp(-w.genes.turn * dt);
+      d.vx += (vx * spd - d.vx) * kk;
+      d.vy += (vy * spd - d.vy) * kk;
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      if (d.x < C.drifterR) { d.x = C.drifterR; if (d.vx < 0) d.vx *= -0.35; }
+      if (d.x > 1 - C.drifterR) { d.x = 1 - C.drifterR; if (d.vx > 0) d.vx *= -0.35; }
+      if (d.y < C.drifterR) { d.y = C.drifterR; if (d.vy < 0) d.vy *= -0.35; }
+      if (d.y > 1 - C.drifterR) { d.y = 1 - C.drifterR; if (d.vy > 0) d.vy *= -0.35; }
+    }
+
+    /* descriptors: proximity (heat) and company (crowd) */
+    let dmin = Infinity, near = null, company = 0;
+    for (const d of w.drifters) {
+      const dd = Math.hypot(w.px - d.x, w.py - d.y);
+      if (dd < dmin) { dmin = dd; near = d; }
+      /* soft count: a hunter at the door counts, one across the room does not */
+      if (dd < 0.45) company += 1 - dd / 0.45;
+    }
+    const prox = Math.max(0, 1 - dmin / C.grazeR);
+    w.heatSum += prox;
+    w.crowdSum += company;
+    const inGraze = dmin < C.grazeR;
+    if (inGraze && !w.inGraze) w.grazeEpisodes++;
+    w.inGraze = inGraze;
+
+    /* charge: you have to hold still near a hunter to earn a mote.
+     * Leaving the radius starts a grace timer instead of dropping the charge
+     * on the spot, so a full ring survives the step out to a nearby mote. */
+    if (prox > 0) {
+      w.charge = Math.min(1, w.charge + (C.chargeGain + C.chargeEdge * prox) * dt);
+      w.graceLeft = C.chargeGrace;
+    } else if (w.graceLeft > 0) {
+      w.graceLeft = Math.max(0, w.graceLeft - dt);
+    } else {
+      w.charge = Math.max(0, w.charge - C.chargeLoss * dt);
+    }
+
+    w.speedSum += Math.hypot(w.pvx, w.pvy) / C.speed;
+
+    /* collection: a mote only yields to a charged player */
+    if (w.charge >= 1) {
+      for (const s of w.sparks) {
+        if (!s.taken && Math.hypot(w.px - s.x, w.py - s.y) < C.playerR + C.sparkR) {
+          s.taken = true;
+          w.collected++;
+          w.refDist += Math.hypot(s.x - w.lastX, s.y - w.lastY);
+          w.lastX = s.x;
+          w.lastY = s.y;
+          w.charge = 0;
+          w.graceLeft = 0;
+          w.events.push({ t: w.t, kind: 'spark', x: s.x, y: s.y });
+          break;
+        }
+      }
+    }
+
+    /* contact: the first hit cracks you open, the second ends the run */
+    let hit = null;
+    if (w.invuln <= 0) {
+      for (const d of w.drifters) {
+        if (Math.hypot(w.px - d.x, w.py - d.y) < C.playerR + C.drifterR) { hit = d; break; }
+      }
+      if (!hit) {
+        for (const th of w.thorns) {
+          if (Math.hypot(w.px - th.x, w.py - th.y) < C.playerR + C.thornR) { hit = th; break; }
+        }
+      }
+    }
+    if (hit) {
+      w.lives--;
+      w.charge = 0;
+      w.graceLeft = 0;
+      w.invuln = 0.9;
+      /* shove away from whatever hit you */
+      const dx = w.px - hit.x, dy = w.py - hit.y;
+      const m = Math.hypot(dx, dy) || 1e-6;
+      w.px = Math.min(1 - C.playerR, Math.max(C.playerR, w.px + (dx / m) * 0.06));
+      w.py = Math.min(1 - C.playerR, Math.max(C.playerR, w.py + (dy / m) * 0.06));
+      w.pvx = (dx / m) * C.speed * 0.8;
+      w.pvy = (dy / m) * C.speed * 0.8;
+      w.events.push({ t: w.t, kind: 'crack', x: w.px, y: w.py });
+      if (w.lives <= 0) {
+        w.state = 'dead';
+        w.endT = w.t;
+        w.events.push({ t: w.t, kind: 'death' });
+        return w;
+      }
+    }
+
+    /* the only ending is the last mote; the run has no clock */
+    if (w.collected >= w.sparks.length) {
+      w.state = 'clear';
+      w.endT = w.t;
+    }
+    return w;
+  }
+
+  function descriptors(w) {
+    const n = Math.max(1, w.steps);
+    return {
+      heat: Math.min(1, w.heatSum / n),
+      crowd: w.crowdSum / n,
+      grazes: w.grazeEpisodes,
+      time: w.endT || w.t,
+    };
+  }
+
+  /* A reference time for the route: the straight lines between the motes in
+   * the order they were taken, at full speed, plus the charge for each mote at
+   * the rim rate. It is not a strict lower bound — charge reaches 3.1/s at zero
+   * distance and accrues while you move, so a well-flown clear can beat it and
+   * efficiency clamps at 1. Read it as a best-case reference, not a floor.
+   * Compared with the actual clear time it gives an SPL-style efficiency
+   * (Anderson et al. 2018; Mishkin et al. 2019). */
+  function referenceTime(w) {
+    if (!w.collected) return 0;
+    return w.refDist / C.speed + w.collected / C.chargeGain;
+  }
+
+  /* Run one episode to its end. `policy(world)` returns {x,y}; omit for a still player. */
+  function runEpisode(genes, seed, policy, dt) {
+    const w = createWorld(genes, seed);
+    const stepDt = dt == null ? C.dt : dt;
+    const guard = Math.ceil(C.guardSeconds / stepDt);
+    let i = 0, held = null;
+    while (w.state === 'play' && i++ < guard) {
+      /* a policy does not have to think at 60 Hz; the bot decides every third tick */
+      if (policy && (i % 3 === 1 || held == null)) held = policy(w);
+      step(w, policy ? held : null, stepDt);
+    }
+    if (w.state === 'play') { w.state = 'stalled'; w.endT = w.t; }
+    const d = descriptors(w);
+    const progress = w.collected / w.sparks.length;
+    const ref = referenceTime(w);
+    const clearT = w.state === 'clear' ? d.time : 0;
+    const eff = w.state === 'clear' ? ref / Math.max(d.time, ref) : 0;
+    return {
+      genes: w.genes, seed: w.seed, state: w.state, progress,
+      heat: d.heat, crowd: d.crowd, grazes: d.grazes, time: d.time,
+      ended: w.state === 'clear', clearTime: clearT, referenceTime: ref, eff,
+    };
+  }
+
+  const API = {
+    GENE_SPECS, GENE_KEYS, C, TAU,
+    mulberry32, sampleGenes, mutateGenes, normaliseGenes, genesKey, hashString,
+    createWorld, step, descriptors, referenceTime, runEpisode,
+  };
+
+  if (typeof module === 'object' && module.exports) module.exports = API;
+  else root.VIV = API;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/* VIVARIUM — the reference player.
+ *
+ * One hand-written policy, identical for every level, so that what changes
+ * between cells is the world and not the bot. The loop is the game's loop:
+ * when uncharged, close on a hunter and orbit it at arm's length; when charged,
+ * spend it on the nearest mote. Everything else is avoidance.
+ */
+(function (root) {
+  'use strict';
+
+  const THORN_FEAR = 0.13;
+  const WALL = 0.06;
+  const HOLD = 0.098;      // distance it orbits a hunter at while charging
+  const SAFE = 0.20;       // personal space when it has something to spend
+
+  function clearance(w, x, y) {
+    let m = Math.min(x, 1 - x, y, 1 - y);
+    for (const d of w.drifters) m = Math.min(m, Math.hypot(x - d.x, y - d.y));
+    for (const t of w.thorns) m = Math.min(m, Math.hypot(x - t.x, y - t.y) - 0.02);
+    return m;
+  }
+
+  function botInput(w) {
+    const px = w.px, py = w.py;
+    const charged = w.charge >= 1;
+    let ax = 0, ay = 0;
+    let held = null;
+
+    if (!charged) {
+      /* --- close on the nearest hunter and circle it --- */
+      let d = null, nd = Infinity;
+      for (const h of w.drifters) {
+        const dd = Math.hypot(px - h.x, py - h.y);
+        if (dd < nd) { nd = dd; d = h; }
+      }
+      if (d) {
+        held = d;
+        const dx = px - d.x, dy = py - d.y;
+        const r = Math.hypot(dx, dy) || 1e-6;
+        const ux = dx / r, uy = dy / r;
+        /* radial correction: outside the ring pull in, inside push out */
+        const radial = r >= HOLD
+          ? -Math.min(1, (r - HOLD) * 6)
+          : Math.min(1, (HOLD - r) * 16);
+        /* orbit the way with more room */
+        const tx = -uy, ty = ux;
+        const a = clearance(w, px + tx * 0.14, py + ty * 0.14);
+        const b = clearance(w, px - tx * 0.14, py - ty * 0.14);
+        const sign = b > a ? -1 : 1;
+        ax += ux * radial + tx * sign * 1.25;
+        ay += uy * radial + ty * sign * 1.25;
+      }
+    } else {
+      /* --- spend the charge on the least-guarded mote --- */
+      let best = null, bestScore = Infinity;
+      for (const s of w.sparks) {
+        if (s.taken) continue;
+        const dx = s.x - px, dy = s.y - py;
+        const dist = Math.hypot(dx, dy);
+        let threat = 0;
+        for (let i = 1; i <= 5; i++) {
+          const f = i / 5;
+          const mx = px + dx * f, my = py + dy * f;
+          for (const d of w.drifters) {
+            const dd = Math.hypot(mx - d.x, my - d.y);
+            if (dd < 0.14) threat += (0.14 - dd) / 0.14;
+          }
+        }
+        const score = dist + threat * 0.25;
+        if (score < bestScore) { bestScore = score; best = s; }
+      }
+      if (best) {
+        const dx = best.x - px, dy = best.y - py;
+        const m = Math.hypot(dx, dy) || 1;
+        ax += dx / m;
+        ay += dy / m;
+      }
+    }
+
+    /* --- keep out of everything else --- */
+    const space = held ? 0.15 : SAFE;
+    for (const d of w.drifters) {
+      if (d === held) continue;
+      const dx = px - d.x, dy = py - d.y;
+      const dist = Math.hypot(dx, dy) || 1e-6;
+      const near = Math.max(0, 1 - dist / space);
+      if (near <= 0) continue;
+      const wgt = near * near * 2.4;
+      ax += (dx / dist) * wgt;
+      ay += (dy / dist) * wgt;
+      if (dist < space * 0.7) {
+        const tang = near * 0.8;
+        ax += (-dy / dist) * tang;
+        ay += (dx / dist) * tang;
+      }
+    }
+
+    /* thorns */
+    for (const th of w.thorns) {
+      const dx = px - th.x, dy = py - th.y;
+      const dist = Math.hypot(dx, dy) || 1e-6;
+      if (dist < THORN_FEAR) {
+        const near = 1 - dist / THORN_FEAR;
+        ax += (dx / dist) * near * near * 2.4;
+        ay += (dy / dist) * near * near * 2.4;
+      }
+    }
+
+    /* walls */
+    if (px < WALL) ax += (WALL - px) / WALL * 1.6;
+    if (px > 1 - WALL) ax -= (px - (1 - WALL)) / WALL * 1.6;
+    if (py < WALL) ay += (WALL - py) / WALL * 1.6;
+    if (py > 1 - WALL) ay -= (py - (1 - WALL)) / WALL * 1.6;
+
+    const m = Math.hypot(ax, ay);
+    if (m < 1e-6) return { x: 0, y: 0 };
+    return { x: ax / m, y: ay / m };
+  }
+
+  const API = { botInput, HOLD, SAFE, THORN_FEAR, WALL };
+  if (typeof module === 'object' && module.exports) module.exports = API;
+  else root.VIVBOT = API;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/* VIVARIUM — the search.
+ *
+ * MAP-Elites over six genes. A candidate is evaluated by the reference
+ * player, filed by the behaviour it produced (how close the game keeps you,
+ * how many hunters it keeps around you), and kept if its fitness is higher
+ * than whatever already lives in that cell.
+ *
+ * The fitness function has two terms. A clear is worth a fixed base plus a
+ * share for how efficiently it was done (reference route time over actual
+ * clear time,
+ * an SPL-style ratio). A death is worth less than any clear, scaled by how
+ * close the run got to the 85% band that used to be the whole objective.
+ * The band survives as partial credit and as the selector's target.
+ */
+(function (root) {
+  'use strict';
+  const V = typeof module === 'object' && module.exports ? require('./engine.js') : root.VIV;
+  const BOT = typeof module === 'object' && module.exports ? require('./bot.js') : root.VIVBOT;
+
+  const SIZE = 16;
+  const TARGET = 0.85;          // Wilson et al. 2019, kept as the failure band
+  const BASE = 0.6;             // fitness floor of a clear
+  const EFF = 0.4;              // share of a clear's fitness that efficiency can move
+  const FAIL = 0.55;            // ceiling for a run that ends in death
+  const HEAT_SPAN = 0.28;       // heat that maps to the right edge of the map
+  const CROWD_SPAN = 4.6;       // soft hunter count within 0.45 that maps to the top
+
+  function bin(heat, crowd, size) {
+    size = size || SIZE;
+    const x = Math.min(size - 1, Math.max(0, Math.floor((heat / HEAT_SPAN) * size)));
+    const y = Math.min(size - 1, Math.max(0, Math.floor((crowd / CROWD_SPAN) * size)));
+    return y * size + x;
+  }
+
+  function band(heat, crowd) {
+    const h = Math.min(4, Math.floor((heat / HEAT_SPAN) * 5));
+    const c = Math.min(4, Math.floor((crowd / CROWD_SPAN) * 5));
+    return { h, c };
+  }
+
+  function evaluate(genes, seeds) {
+    if (!seeds || !seeds.length) seeds = [1, 2, 3];
+    let progress = 0, heat = 0, crowd = 0, time = 0, grazes = 0, fitness = 0;
+    let clears = 0, effSum = 0, clearTimeSum = 0;
+    for (const s of seeds) {
+      const r = V.runEpisode(genes, s, BOT.botInput);
+      progress += r.progress;
+      heat += r.heat;
+      crowd += r.crowd;
+      time += r.time;
+      grazes += r.grazes;
+      fitness += fitnessOf(r);
+      if (r.state === 'clear') {
+        clears++;
+        effSum += r.eff;
+        clearTimeSum += r.clearTime;
+      }
+    }
+    const n = seeds.length;
+    return {
+      progress: progress / n, heat: heat / n, crowd: crowd / n,
+      time: time / n, grazes: grazes / n, fitness: fitness / n,
+      clears: clears / n, eff: clears ? effSum / clears : 0,
+      clearTime: clears ? clearTimeSum / clears : 0,
+    };
+  }
+
+  /* One run's fitness: a clear scores BASE..BASE+EFF by efficiency; a failure
+   * scores at most FAIL, scaled by closeness to the band, so no failure can
+   * outrank a clear. */
+  function fitnessOf(run) {
+    if (run.state === 'clear') return BASE + EFF * Math.min(1, Math.max(0, run.eff));
+    const band = Math.max(0, 1 - Math.abs(run.progress - TARGET));
+    return FAIL * band;
+  }
+
+  function createArchive(size) {
+    size = size || SIZE;
+    return { size, cells: new Array(size * size).fill(null), evals: 0, coverage: 0, best: null };
+  }
+
+  /* Evaluate one genome and file it. Returns the record either way (for stats). */
+  function consider(archive, genes, seeds) {
+    const r = evaluate(genes, seeds);
+    const f = r.fitness;
+    const idx = bin(r.heat, r.crowd, archive.size);
+    archive.evals++;
+    const rec = {
+      index: idx, genes, fitness: f, progress: r.progress,
+      heat: r.heat, crowd: r.crowd, time: r.time, grazes: r.grazes,
+      clears: r.clears, eff: r.eff, clearTime: r.clearTime,
+      band: band(r.heat, r.crowd),
+    };
+    const cur = archive.cells[idx];
+    rec.fresh = !cur || f > cur.fitness;
+    if (rec.fresh) {
+      archive.cells[idx] = rec;
+      if (!cur) archive.coverage++;
+      if (!archive.best || f > archive.best.fitness) archive.best = rec;
+    }
+    return rec;
+  }
+
+  function pickParent(archive, rnd) {
+    const roll = rnd();
+    if (roll < 0.08) return null;                       // fresh blood
+    if (roll < 0.16 && archive.best) return archive.best.genes;
+    if (archive.coverage === 0) return null;
+    /* uniform over filled cells */
+    let seen = Math.floor(rnd() * archive.coverage);
+    for (const c of archive.cells) {
+      if (!c) continue;
+      if (seen-- === 0) return c.genes;
+    }
+    return null;
+  }
+
+  function searchOnce(archive, rnd, sigma) {
+    const parent = pickParent(archive, rnd);
+    const genes = parent ? V.mutateGenes(parent, rnd, sigma) : V.sampleGenes(rnd);
+    return consider(archive, genes);
+  }
+
+  /* Fill the archive for a number of ms; used by the page so the grid grows live. */
+  function searchFor(archive, rnd, ms, nowFn, sigma) {
+    const now = nowFn || (() => Date.now());
+    const t0 = now();
+    let n = 0;
+    do {
+      searchOnce(archive, rnd, sigma);
+      n++;
+    } while (now() - t0 < ms && n < 400);
+    return n;
+  }
+
+  /* Deterministic backfill for headless use and tests. */
+  function searchN(archive, rnd, n, sigma) {
+    for (let i = 0; i < n; i++) searchOnce(archive, rnd, sigma);
+    return archive;
+  }
+
+  function qdScore(archive) {
+    return archive.cells.reduce((s, c) => s + (c ? c.fitness : 0), 0);
+  }
+
+  const API = {
+    SIZE, TARGET, HEAT_SPAN, CROWD_SPAN,
+    bin, band, evaluate, fitnessOf, createArchive, consider, searchOnce, searchFor, searchN, qdScore, BASE, EFF, FAIL,
+  };
+  if (typeof module === 'object' && module.exports) module.exports = API;
+  else root.VIVSEARCH = API;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/* VIVARIUM — the selector.
+ *
+ * The search calibrates each cell against the reference player. The selector
+ * calibrates the curriculum against you: it keeps a Beta posterior over "you clear
+ * this cell", spends the first few runs spreading across the map, and after
+ * that keeps handing you the level whose posterior sits closest to 85%.
+ */
+(function (root) {
+  'use strict';
+  const SR = typeof module === 'object' && module.exports ? require('./search.js') : root.VIVSEARCH;
+
+  const BAND = 0.85;
+  const WARMUP = 6;      // runs spent spreading out before it starts tuning
+  const MAX_RUNS = 4;    // stop returning to a cell after this many attempts
+  const GAP = 0.30;      // how far from the band the best candidate may sit before it explores
+
+  function createSelector() {
+    return { records: Object.create(null), runs: 0, wins: 0, history: [] };
+  }
+
+  function record(selector, cell, run) {
+    const r = selector.records[cell] || (selector.records[cell] = { runs: 0, wins: 0, best: 0, last: -1 });
+    r.runs++;
+    r.best = Math.max(r.best, run.progress);
+    r.last = selector.runs;
+    if (run.state === 'clear') { r.wins++; selector.wins++; }
+    selector.runs++;
+    selector.history.push({ cell, progress: run.progress, state: run.state, heat: run.heat, crowd: run.crowd });
+  }
+
+  function filledCells(archive) {
+    const out = [];
+    for (let i = 0; i < archive.cells.length; i++) if (archive.cells[i]) out.push(i);
+    return out;
+  }
+
+  /* normalised behaviour distance, for spreading the first few runs */
+  function dist(a, b) {
+    const dx = (a.heat - b.heat) / SR.HEAT_SPAN;
+    const dy = (a.crowd - b.crowd) / SR.CROWD_SPAN;
+    return Math.hypot(dx, dy);
+  }
+
+  function farthest(selector, archive, candidates) {
+    const played = Object.keys(selector.records).map(Number).filter((i) => archive.cells[i]);
+    if (!played.length) {
+      /* first run: start at the most ordinary cell on the map */
+      let best = candidates[0], bestD = Infinity;
+      for (const i of candidates) {
+        const c = archive.cells[i];
+        const d = Math.hypot((c.heat - SR.HEAT_SPAN / 2) / SR.HEAT_SPAN, (c.crowd - SR.CROWD_SPAN / 2) / SR.CROWD_SPAN);
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      return best;
+    }
+    let best = candidates[0], bestD = -1;
+    for (const i of candidates) {
+      const c = archive.cells[i];
+      let m = Infinity;
+      for (const p of played) m = Math.min(m, dist(c, archive.cells[p]));
+      if (m > bestD) { bestD = m; best = i; }
+    }
+    return best;
+  }
+
+  function posterior(rec) {
+    return (rec.wins + 1) / (rec.runs + 2);
+  }
+
+  /* Pick the next level. Returns {index, why} or null if the archive is empty. */
+  function pick(selector, archive, exclude, gapThreshold) {
+    const gapMax = gapThreshold == null ? GAP : gapThreshold;
+    const filled = filledCells(archive).filter((i) => i !== exclude);
+    if (!filled.length) return null;
+    const played = Object.keys(selector.records).map(Number).filter((i) => archive.cells[i] && i !== exclude);
+    const unplayed = filled.filter((i) => !selector.records[i]);
+
+    if (selector.runs < WARMUP && unplayed.length) {
+      return { index: farthest(selector, archive, unplayed), why: 'new' };
+    }
+    if (!played.length) return { index: farthest(selector, archive, filled), why: 'new' };
+
+    let best = null;
+    for (const i of played) {
+      const rec = selector.records[i];
+      if (rec.runs >= MAX_RUNS) continue;
+      const p = posterior(rec);
+      const gap = Math.abs(p - BAND);
+      if (!best || gap < best.gap) best = { index: i, gap, p, runs: rec.runs };
+    }
+    if (best && best.gap <= gapMax) {
+      return { index: best.index, why: best.p < BAND ? 'hard' : 'easy', p: best.p };
+    }
+    if (unplayed.length) {
+      return { index: farthest(selector, archive, unplayed), why: 'new' };
+    }
+    if (best) return { index: best.index, why: best.p < BAND ? 'hard' : 'easy', p: best.p };
+    return { index: null, why: 'exhausted' };
+  }
+
+  function stats(selector) {
+    const cells = Object.keys(selector.records).length;
+    return {
+      runs: selector.runs, wins: selector.wins, cells,
+      rate: selector.runs ? selector.wins / selector.runs : null,
+    };
+  }
+
+  /* Most recent runs as a compact series for the little chart. */
+  function recent(selector, n) {
+    return selector.history.slice(-(n || 14));
+  }
+
+  const API = { BAND, WARMUP, MAX_RUNS, GAP, createSelector, record, pick, stats, recent, posterior };
+  if (typeof module === 'object' && module.exports) module.exports = API;
+  else root.VIVSEL = API;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/* VIVARIUM — what to call a cell.
+ *
+ * Two words, one from each axis of the map, so a cell's name is a reading of
+ * its coordinates: a "burning swarm" is as far up and to the right as it gets.
+ */
+(function (root) {
+  'use strict';
+
+  const HEAT = ['cold', 'quiet', 'warm', 'hot', 'burning'];
+  const CROWD = ['solitude', 'pair', 'company', 'crowd', 'swarm'];
+
+  function nameFor(band) {
+    return HEAT[Math.max(0, Math.min(4, band.h))] + ' ' + CROWD[Math.max(0, Math.min(4, band.c))];
+  }
+
+  function genesLine(g) {
+    const s = (n) => (n === 1 ? '' : 's');
+    return `${g.sparks} mote${s(g.sparks)} · ${g.drifters} hunter${s(g.drifters)}`;
+  }
+
+  const API = { HEAT, CROWD, nameFor, genesLine };
+  if (typeof module === 'object' && module.exports) module.exports = API;
+  else root.VIVNAME = API;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/* VIVARIUM — the page.
+ *
+ * Two halves of one idea. The search illuminates the map of levels with a
+ * reference player; the selector plans a curriculum across that map for you, aiming at
+ * an 85% clear rate — hard, but not a coin flip.
+ */
+(function () {
+  'use strict';
+
+  const E = window.VIV, SR = window.VIVSEARCH, SEL = window.VIVSEL, NA = window.VIVNAME;
+  const $ = (s) => document.querySelector(s);
+
+  const COL = {
+    mint: '#7ee0c2', amber: '#f2c14e', red: '#e8654f', blue: '#6fb2e8',
+    ink: '#e8f0ee', dim: '#5a6d6d', mute: '#8fa2a2',
+  };
+
+  const state = {
+    archive: SR.createArchive(16),
+    rnd: E.mulberry32(0x5eed1a),
+    selector: SEL.createSelector(),
+    ms: 8,
+    view: 'archive',
+    mode: 'idle',            // idle | ready | playing | over
+    cell: null,
+    seed: 1,
+    attempt: 0,
+    world: null,
+    selected: null,
+    lastRun: null,
+    acc: 0,
+    last: 0,
+    keys: new Set(),
+    pointer: { down: false, x: 0, y: 0 },
+    hover: -1,
+    particles: [],
+    shake: 0,
+    flash: 0,
+    hint: 'click a cell to play it',
+  };
+
+  /* ---------------- canvas plumbing ---------------- */
+
+  function fit(cv) {
+    const dpr = window.devicePixelRatio || 1;
+    const r = cv.getBoundingClientRect();
+    const w = Math.max(1, Math.round(r.width));
+    const h = Math.max(1, Math.round(r.height));
+    if (cv.width !== w * dpr || cv.height !== h * dpr) {
+      cv.width = w * dpr;
+      cv.height = h * dpr;
+    }
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w, h };
+  }
+
+  const game = $('#game');
+  const mapCv = $('#map');
+  const sparkCv = $('#spark').appendChild(document.createElement('canvas'));
+
+  /* ---------------- overlay + hud ---------------- */
+
+  const overlay = $('#overlay');
+  function overlayShow(kicker, text, hint) {
+    overlay.classList.remove('hide');
+    overlay.innerHTML = `<div class="ov"><div class="ovk">${kicker}</div><div class="ovt">${text}</div><div class="ova">${hint}</div></div>`;
+  }
+  function overlayHide() { overlay.classList.add('hide'); }
+
+  const hud = $('#hud');
+  const hudEl = {
+    motes: $('#hudMotes'), charge: $('#hudCharge'),
+    time: $('#hudTime'), lives: $('#hudLives'),
+  };
+
+  /* ---------------- level selection ---------------- */
+
+  function cellName(cell) { return NA.nameFor(cell.band); }
+
+  function selectCell(idx, opts) {
+    const cell = state.archive.cells[idx];
+    if (!cell) return;
+    state.cell = idx;
+    state.selected = idx;
+    state.attempt = 0;
+    state.seed = 1;
+    state.world = E.createWorld(cell.genes, state.seed);
+    state.mode = 'ready';
+    state.lastRun = null;
+    state.particles.length = 0;
+    state.seenEvents = 0;
+    state.acc = 0;
+
+    $('#levelName').textContent = cellName(cell);
+    $('#levelSub').textContent = NA.genesLine(cell.genes) + ' · ' + labelFor(cell.band);
+    setResult('—', '', [], '');
+    overlayShow('READY', cellName(cell), 'move with WASD or arrow keys · or hold the mouse · press any key to begin');
+    hud.classList.add('on');
+    updateHud();
+    if (!opts || !opts.silent) $('#game').focus();
+  }
+
+  function labelFor(band) {
+    const h = ['it keeps its distance', 'it comes in spells', 'it leans on you', 'it is always near', 'it never lets go'][band.h];
+    const c = ['one hunter', 'a pair', 'a handful', 'a crowd', 'a swarm'][band.c];
+    return `${c} — ${h}`;
+  }
+
+  function retry() {
+    if (state.cell == null) return;
+    const cell = state.archive.cells[state.cell];
+    if (!cell) return;
+    state.attempt++;
+    state.seed = state.attempt + 1;
+    state.world = E.createWorld(cell.genes, state.seed);
+    state.mode = 'ready';
+    state.particles.length = 0;
+    state.seenEvents = 0;
+    state.acc = 0;
+    overlayShow('READY', cellName(cell), 'same level, different arrangement · press any key to begin');
+    updateHud();
+  }
+
+  function nextLevel() {
+    const pick = SEL.pick(state.selector, state.archive, state.cell);
+    if (!pick) { overlayShow('NO CELLS YET', 'the search has not finished a single level', 'give it a few seconds'); return; }
+    if (pick.index == null) { overlayShow('CURRICULUM COMPLETE', 'every cell has had its four attempts', 'switch to the archive tab to search more, or reload for a fresh curriculum'); return; }
+    selectCell(pick.index);
+  }
+
+  /* ---------------- run lifecycle ---------------- */
+
+  function begin() {
+    if (state.mode !== 'ready') return;
+    state.mode = 'playing';
+    overlayHide();
+  }
+
+  function endRun() {
+    const w = state.world;
+    state.mode = 'over';
+    const run = {
+      genes: w.genes, seed: w.seed, state: w.state,
+      progress: w.collected / w.sparks.length,
+      heat: Math.min(1, w.heatSum / Math.max(1, w.steps)),
+      crowd: w.crowdSum / Math.max(1, w.steps),
+      grazes: w.grazeEpisodes,
+      time: w.endT || w.t,
+      eff: w.state === 'clear'
+        ? E.referenceTime(w) / Math.max(w.endT || w.t, E.referenceTime(w))
+        : 0,
+    };
+    state.lastRun = run;
+    SEL.record(state.selector, state.cell, run);
+
+    const cleared = w.state === 'clear';
+    const title = cleared ? 'CLEARED' : 'YOU BROKE';
+    const cls = cleared ? 'good' : 'bad';
+    const line = `${w.collected}/${w.sparks.length} motes · ${run.time.toFixed(1)}s · speed ${run.eff.toFixed(2)} · heat ${run.heat.toFixed(2)} · company ${run.crowd.toFixed(1)}`;
+    setResult(title, line, [
+      { label: 'AGAIN', fn: retry },
+      { label: 'NEXT', fn: nextLevel, primary: true },
+    ], cls);
+
+    if (cleared) state.flash = 0.5; else state.shake = 0.4;
+    updateHud();
+    updateSide();
+    updateCurriculum();
+  }
+
+  function setResult(title, line, buttons, cls) {
+    const r = $('#result');
+    r.querySelector('.rtitle').textContent = title;
+    r.querySelector('.rtitle').className = 'rtitle ' + (cls || '');
+    r.querySelector('.rline').textContent = line;
+    const box = $('#rbtns');
+    box.innerHTML = '';
+    for (const b of buttons || []) {
+      const el = document.createElement('button');
+      el.className = 'act' + (b.primary ? ' primary' : '');
+      el.textContent = b.label;
+      el.addEventListener('click', b.fn);
+      box.appendChild(el);
+    }
+  }
+
+  /* ---------------- simulation ---------------- */
+
+  function playerInput() {
+    let x = 0, y = 0;
+    if (state.keys.has('ArrowLeft') || state.keys.has('a')) x -= 1;
+    if (state.keys.has('ArrowRight') || state.keys.has('d')) x += 1;
+    if (state.keys.has('ArrowUp') || state.keys.has('w')) y -= 1;
+    if (state.keys.has('ArrowDown') || state.keys.has('s')) y += 1;
+    if (state.pointer.down) {
+      const w = state.world;
+      const dx = state.pointer.x - w.px;
+      const dy = state.pointer.y - w.py;
+      const m = Math.hypot(dx, dy);
+      if (m > 0.01) { x = dx / m; y = dy / m; }
+    }
+    return { x, y };
+  }
+
+  function tick(now) {
+    const dtReal = state.last ? Math.min(0.1, (now - state.last) / 1000) : 0;
+    state.last = now;
+
+    if (state.ms > 0 && state.mode !== 'playing' && state.view !== 'curriculum') {
+      SR.searchFor(state.archive, state.rnd, state.ms, () => performance.now());
+    }
+
+    if (state.mode === 'playing' && state.world) {
+      state.acc += dtReal;
+      let guard = 0;
+      while (state.acc >= E.C.dt && guard++ < 8) {
+        E.step(state.world, playerInput(), E.C.dt);
+        state.acc -= E.C.dt;
+        if (state.world.state !== 'play') { endRun(); break; }
+      }
+      consumeEvents();
+    }
+
+    for (const p of state.particles) { p.life -= dtReal; }
+    state.particles = state.particles.filter((p) => p.life > 0);
+    state.shake = Math.max(0, state.shake - dtReal * 2.2);
+    state.flash = Math.max(0, state.flash - dtReal * 1.6);
+
+    drawGame();
+    drawMap();
+    updateHud();
+    state.sideAt = (state.sideAt || 0) + dtReal;
+    if (state.sideAt > 0.2) { state.sideAt = 0; updateSide(); }
+    if (state.mode !== 'playing') drawSpark();
+    requestAnimationFrame(tick);
+  }
+
+  /* turn the world's event log into little expanding rings */
+  function consumeEvents() {
+    const w = state.world;
+    if (!w) return;
+    const seen = state.seenEvents || 0;
+    for (let i = seen; i < w.events.length; i++) {
+      const ev = w.events[i];
+      if (ev.x == null) continue;
+      state.particles.push({
+        x: ev.x, y: ev.y, r0: 0.012, life: 0.45, life0: 0.45,
+        color: ev.kind === 'spark' ? 'rgba(242,193,78,ALPHA)' : 'rgba(232,101,79,ALPHA)',
+      });
+    }
+    state.seenEvents = w.events.length;
+  }
+
+  /* ---------------- drawing: the level ---------------- */
+
+  function drawGame() {
+    const { ctx, w: W, h: H } = fit(game);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#080c0e';
+    ctx.fillRect(0, 0, W, H);
+
+    /* faint measuring grid */
+    ctx.strokeStyle = '#0e1518';
+    ctx.lineWidth = 1;
+    for (let i = 1; i < 10; i++) {
+      ctx.beginPath(); ctx.moveTo((i / 10) * W, 0); ctx.lineTo((i / 10) * W, H); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, (i / 10) * H); ctx.lineTo(W, (i / 10) * H); ctx.stroke();
+    }
+    ctx.strokeStyle = '#243138';
+    ctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+
+    const world = state.world;
+    if (!world) {
+      /* idle: a slow starfield of a map not yet opened */
+      const t = performance.now() / 1000;
+      for (let i = 0; i < 60; i++) {
+        const a = (i * 2.399) % (Math.PI * 2);
+        const r = 0.12 + ((i * 0.37) % 0.36);
+        const x = 0.5 + Math.cos(a + t * 0.05) * r;
+        const y = 0.5 + Math.sin(a + t * 0.05) * r;
+        ctx.fillStyle = 'rgba(126,224,194,0.18)';
+        ctx.beginPath(); ctx.arc(x * W, y * H, 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+      return;
+    }
+
+    const sx = state.shake > 0 ? (Math.random() - 0.5) * 10 * state.shake : 0;
+    const sy = state.shake > 0 ? (Math.random() - 0.5) * 10 * state.shake : 0;
+    ctx.save();
+    ctx.translate(sx, sy);
+    const P = (v) => v * W;
+
+    /* thorns */
+    for (const th of world.thorns) {
+      const x = P(th.x), y = P(th.y), r = P(E.C.thornR);
+      ctx.fillStyle = '#2b2126';
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        const px = x + Math.cos(a) * r * 1.5;
+        const py = y + Math.sin(a) * r * 1.5;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#6b4340'; ctx.lineWidth = 1; ctx.stroke();
+    }
+
+    /* motes */
+    const lit = world.charge >= 1;
+    const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 240);
+    for (const s of world.sparks) {
+      if (s.taken) continue;
+      const x = P(s.x), y = P(s.y), r = P(E.C.sparkR);
+      ctx.beginPath();
+      ctx.arc(x, y, r * (lit ? 1.5 : 1.25) + pulse * (lit ? 1.6 : 0.8), 0, Math.PI * 2);
+      ctx.fillStyle = lit ? 'rgba(242,193,78,0.95)' : 'rgba(242,193,78,0.30)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, r * 2.6, 0, Math.PI * 2);
+      ctx.strokeStyle = lit ? 'rgba(242,193,78,0.35)' : 'rgba(242,193,78,0.10)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    /* hunters */
+    for (const d of world.drifters) {
+      const x = P(d.x), y = P(d.y), r = P(E.C.drifterR);
+      const g = ctx.createRadialGradient(x, y, r * 0.2, x, y, r * 3.4);
+      g.addColorStop(0, 'rgba(232,101,79,0.30)');
+      g.addColorStop(1, 'rgba(232,101,79,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r * 3.4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(232,101,79,0.92)';
+      ctx.fill();
+      const m = Math.hypot(d.vx, d.vy) || 1;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (d.vx / m) * r * 2.4, y + (d.vy / m) * r * 2.4);
+      ctx.strokeStyle = 'rgba(232,101,79,0.55)'; ctx.lineWidth = 1.4; ctx.stroke();
+    }
+
+    /* the ring that says "stand here" */
+    let nd = Infinity;
+    for (const d of world.drifters) nd = Math.min(nd, Math.hypot(world.px - d.x, world.py - d.y));
+    if (nd < E.C.grazeR * 2.2) {
+      const near = world.drifters.find((d) => Math.hypot(world.px - d.x, world.py - d.y) === nd);
+      if (near) {
+        ctx.beginPath();
+        ctx.arc(P(near.x), P(near.y), P(E.C.grazeR), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(126,224,194,${0.10 + 0.25 * (1 - nd / (E.C.grazeR * 2.2))})`;
+        ctx.setLineDash([3, 5]);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    /* particles */
+    for (const p of state.particles) {
+      ctx.beginPath();
+      ctx.arc(P(p.x), P(p.y), P(p.r0 + (1 - p.life / p.life0) * 0.06), 0, Math.PI * 2);
+      ctx.strokeStyle = p.color.replace('ALPHA', (p.life / p.life0).toFixed(3));
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    /* the player */
+    const px = P(world.px), py = P(world.py), pr = P(E.C.playerR);
+    ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI * 2);
+    ctx.fillStyle = world.invuln > 0 ? 'rgba(126,224,194,0.35)' : 'rgba(126,224,194,0.95)';
+    ctx.fill();
+
+    const ringR = P(0.040);
+    ctx.beginPath();
+    ctx.arc(px, py, ringR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * world.charge);
+    ctx.strokeStyle = world.charge >= 1 ? COL.amber : COL.mint;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(px, py, ringR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(126,224,194,0.12)'; ctx.lineWidth = 2; ctx.stroke();
+    if (world.charge >= 1) {
+      ctx.beginPath();
+      ctx.arc(px, py, ringR + 4 + Math.sin(performance.now() / 200) * 1.5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(242,193,78,0.35)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    /* the grace window: a thin arc that runs down after you leave the radius */
+    if (world.graceLeft > 0 && nd >= E.C.grazeR) {
+      const frac = world.graceLeft / E.C.chargeGrace;
+      ctx.beginPath();
+      ctx.arc(px, py, ringR + 7, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac);
+      ctx.strokeStyle = 'rgba(126,224,194,0.45)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    if (state.flash > 0) {
+      ctx.fillStyle = `rgba(126,224,194,${state.flash * 0.12})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  /* ---------------- drawing: the map ---------------- */
+
+  function drawMap() {
+    const { ctx, w: W, h: H } = fit(mapCv);
+    const n = state.archive.size;
+    const cell = W / n;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#0a0f12';
+    ctx.fillRect(0, 0, W, H);
+
+    for (let i = 0; i < n * n; i++) {
+      const x = (i % n) * cell, y = Math.floor(i / n) * cell;
+      const c = state.archive.cells[i];
+      const rec = state.selector.records[i];
+      if (!c) {
+        ctx.fillStyle = '#0c1214';
+        ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+        continue;
+      }
+      let v;
+      if (state.view === 'curriculum') {
+        v = rec ? 0.14 + 0.68 * rec.best : 0.07;
+      } else {
+        v = 0.16 + 0.62 * c.fitness;
+      }
+      ctx.fillStyle = `rgba(126,224,194,${v.toFixed(3)})`;
+      ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+      if (state.view === 'curriculum' && rec) {
+        /* a notch for "you cleared it" */
+        if (rec.best >= 1) {
+          ctx.fillStyle = 'rgba(8,12,14,0.75)';
+          ctx.fillRect(x + cell * 0.42, y + cell * 0.42, cell * 0.16, cell * 0.16);
+        }
+      }
+    }
+
+    /* suggested cell */
+    if (state.view === 'curriculum') {
+      const pick = SEL.pick(state.selector, state.archive, state.cell);
+      if (pick && pick.index != null) {
+        const x = (pick.index % n) * cell, y = Math.floor(pick.index / n) * cell;
+        ctx.strokeStyle = COL.amber;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.strokeRect(x + 1.5, y + 1.5, cell - 3, cell - 3);
+        ctx.setLineDash([]);
+      }
+    }
+
+    if (state.selected != null) {
+      const x = (state.selected % n) * cell, y = Math.floor(state.selected / n) * cell;
+      ctx.strokeStyle = COL.ink;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x + 1, y + 1, cell - 2, cell - 2);
+    }
+    if (state.hover >= 0 && state.hover !== state.selected) {
+      const x = (state.hover % n) * cell, y = Math.floor(state.hover / n) * cell;
+      ctx.strokeStyle = '#3b4f55';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 1, y + 1, cell - 2, cell - 2);
+    }
+  }
+
+  /* Rolling clear rate over the last 14 runs, against the selector's 0.85 line. */
+  function drawSpark() {
+    const cv = sparkCv;
+    const { ctx, w: W, h: H } = fit(cv);
+    ctx.clearRect(0, 0, W, H);
+    const hist = state.selector.history;
+    if (!hist.length) return;
+    const N = 14;
+    const from = Math.max(0, hist.length - N);
+    const pts = [];
+    for (let i = from; i < hist.length; i++) {
+      const start = Math.max(0, i - N + 1);
+      let wins = 0;
+      for (let k = start; k <= i; k++) if (hist[k].state === 'clear') wins++;
+      pts.push(wins / (i - start + 1));
+    }
+    const x = (i) => pts.length === 1 ? W / 2 : 1 + (i / (pts.length - 1)) * (W - 2);
+    const y = (v) => H - 2 - v * (H - 4);
+
+    ctx.strokeStyle = 'rgba(242,193,78,0.55)';
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath(); ctx.moveTo(0, y(0.85)); ctx.lineTo(W, y(0.85)); ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = COL.mint;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    pts.forEach((v, i) => (i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v))));
+    ctx.stroke();
+    const last = pts.length - 1;
+    ctx.fillStyle = COL.mint;
+    ctx.beginPath(); ctx.arc(x(last), y(pts[last]), 1.8, 0, Math.PI * 2); ctx.fill();
+  }
+
+  /* ---------------- side readouts ---------------- */
+
+  function mapNoteText() {
+    if (state.mode === 'playing') return 'paused while you play';
+    if (state.view === 'curriculum') return 'frozen during the curriculum';
+    return 'live';
+  }
+
+  function updateSide() {
+    const a = state.archive;
+    $('#coverage').textContent = `${a.coverage} / ${a.size * a.size}`;
+    $('#coverageBar').style.width = (100 * a.coverage / (a.size * a.size)).toFixed(1) + '%';
+    $('#evals').textContent = a.evals.toLocaleString();
+    $('#qd').textContent = SR.qdScore(a).toFixed(1);
+    const st = SEL.stats(state.selector);
+    $('#rate').textContent = st.runs ? Math.round(st.rate * 100) + '%' : '—';
+    $('#speedVal').textContent = state.ms === 0 ? 'off' : state.ms + ' ms';
+    $('#mapNote').textContent = mapNoteText();
+
+    if (state.hover >= 0) {
+      const c = a.cells[state.hover];
+      $('#hoverline').textContent = c
+        ? `${cellName(c)} — ${NA.genesLine(c.genes)} — fitness ${c.fitness.toFixed(2)}`
+        : 'unfilled';
+    } else if (state.selected != null) {
+      const c = a.cells[state.selected];
+      if (c) $('#hoverline').textContent = `${cellName(c)} — ${NA.genesLine(c.genes)}`;
+    }
+  }
+
+  function updateHud() {
+    const w = state.world;
+    if (!w) return;
+    hudEl.motes.textContent = `${w.collected}/${w.sparks.length}`;
+    hudEl.charge.textContent = Math.round(w.charge * 100) + '%';
+    hudEl.time.textContent = w.t.toFixed(1);
+    hudEl.lives.textContent = '●'.repeat(Math.max(0, w.lives)) + '○'.repeat(Math.max(0, 2 - w.lives));
+  }
+
+  function updateCurriculum() {
+    const st = SEL.stats(state.selector);
+    const pick = SEL.pick(state.selector, state.archive, state.cell);
+    const el = $('#curriculumText');
+    const name = pick && pick.index != null && state.archive.cells[pick.index]
+      ? cellName(state.archive.cells[pick.index]) : '—';
+    if (!st.runs) {
+      el.innerHTML = 'The selector has not seen you play. <b>Click a cell</b>, or press <b>NEXT</b> and it will start spreading you across the map.';
+      return;
+    }
+    if (st.runs < SEL.WARMUP) {
+      el.innerHTML = `Spreading you out: <b>${st.runs} of ${SEL.WARMUP}</b> runs. It is picking the cell farthest in behaviour from everything you have played, so the map gets covered before it starts tuning.<br>Next: <em>${name}</em>`;
+      return;
+    }
+    if (pick && pick.index == null) {
+      el.innerHTML = `The curriculum is complete: <b>${st.cells}</b> cells played, <b>${st.runs}</b> runs, <b>${Math.round(st.rate * 100)}%</b> cleared. Every cell has had its four attempts. Switch to the archive to search more, or reload for a fresh curriculum.`;
+      return;
+    }
+    const why = pick && pick.why === 'hard' ? 'the one nearest your ceiling' : pick && pick.why === 'easy' ? 'one you can still lose' : 'somewhere unplayed';
+    el.innerHTML = `You clear <b>${Math.round(st.rate * 100)}%</b> of what it hands you across <b>${st.cells}</b> cells. The selector keeps choosing the level whose posterior sits closest to <em>85%</em> — ${why}.<br>Next: <em>${name}</em>`;
+  }
+
+  /* ---------------- events ---------------- */
+
+  function showTab(view) {
+    state.view = view;
+    $('#mapNote').textContent = mapNoteText();
+    document.body.dataset.view = view;
+    document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('on', t.dataset.view === view));
+    if (view === 'curriculum') { updateCurriculum(); drawSpark(); }
+  }
+
+  document.querySelectorAll('.tab').forEach((t) => {
+    t.addEventListener('click', () => showTab(t.dataset.view));
+  });
+
+  $('#nextBtn').addEventListener('click', nextLevel);
+
+  mapCv.addEventListener('mousemove', (e) => {
+    const r = mapCv.getBoundingClientRect();
+    const n = state.archive.size;
+    const x = Math.floor(((e.clientX - r.left) / r.width) * n);
+    const y = Math.floor(((e.clientY - r.top) / r.height) * n);
+    state.hover = (x >= 0 && x < n && y >= 0 && y < n) ? y * n + x : -1;
+    const c = state.hover >= 0 ? state.archive.cells[state.hover] : null;
+    $('#hoverline').textContent = state.hover < 0 ? '' : c
+      ? `${cellName(c)} — ${NA.genesLine(c.genes)} — fitness ${c.fitness.toFixed(2)}`
+      : 'unfilled';
+  });
+  mapCv.addEventListener('mouseleave', () => { state.hover = -1; });
+
+  mapCv.addEventListener('click', (e) => {
+    const r = mapCv.getBoundingClientRect();
+    const n = state.archive.size;
+    const x = Math.floor(((e.clientX - r.left) / r.width) * n);
+    const y = Math.floor(((e.clientY - r.top) / r.height) * n);
+    const idx = y * n + x;
+    if (state.archive.cells[idx]) selectCell(idx);
+    else $('#hoverline').textContent = 'nothing lives there yet';
+  });
+
+  $('#speed').addEventListener('input', (e) => {
+    state.ms = [0, 4, 8, 20][Number(e.target.value)];
+    $('#speedVal').textContent = state.ms === 0 ? 'off' : state.ms + ' ms';
+    $('#mapNote').textContent = mapNoteText();
+  });
+
+  /* pointer steering */
+  const gameWrap = game;
+  function pointerWorld(e) {
+    const r = game.getBoundingClientRect();
+    return {
+      x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+      y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)),
+    };
+  }
+  game.addEventListener('pointerdown', (e) => {
+    if (state.mode === 'ready') begin();
+    if (state.mode !== 'playing') return;
+    const p = pointerWorld(e);
+    state.pointer.down = true;
+    state.pointer.x = p.x; state.pointer.y = p.y;
+    game.setPointerCapture(e.pointerId);
+  });
+  game.addEventListener('pointermove', (e) => {
+    if (!state.pointer.down) return;
+    const p = pointerWorld(e);
+    state.pointer.x = p.x; state.pointer.y = p.y;
+  });
+  game.addEventListener('pointerup', () => { state.pointer.down = false; });
+  game.addEventListener('pointercancel', () => { state.pointer.down = false; });
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key;
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(k)) e.preventDefault();
+    state.keys.add(k.length === 1 ? k.toLowerCase() : k);
+    if (state.mode === 'ready' && (['w', 'a', 's', 'd', 'arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(k.toLowerCase()))) {
+      begin();
+    }
+    if (k.toLowerCase() === 'r' && state.cell != null) retry();
+    if (k.toLowerCase() === 'n') nextLevel();
+  });
+  window.addEventListener('keyup', (e) => {
+    state.keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+  });
+
+  /* ---------------- boot ---------------- */
+
+  /* seed the archive with a handful of real cells so the map is never empty */
+  SR.searchN(state.archive, state.rnd, 24);
+
+  /* open on the most ordinary level so the stage is never blank */
+  const first = SEL.pick(state.selector, state.archive);
+  if (first) {
+    const cell = state.archive.cells[first.index];
+    if (cell) {
+      state.world = E.createWorld(cell.genes, 1);
+      state.cell = first.index;
+      state.selected = first.index;
+      state.mode = 'ready';
+      $('#levelName').textContent = cellName(cell);
+      $('#levelSub').textContent = NA.genesLine(cell.genes) + ' · ' + labelFor(cell.band);
+      overlayShow('FIRST LEVEL', cellName(cell), 'move with WASD or arrow keys · or hold the mouse · press any key to begin');
+      hud.classList.add('on');
+    }
+  }
+  updateSide();
+  updateCurriculum();
+  requestAnimationFrame(tick);
+
+  /* a small hook for automated checks; harmless in normal use */
+  window.__viv = { state, selectCell, retry, nextLevel, showTab };
+})();
+</script>
+</body>
+</html>

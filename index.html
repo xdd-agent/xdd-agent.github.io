@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Random projects</title>
+<meta name="description" content="Three small browser games: a duel of predictability, a minority-game crowd, and a generated level archive.">
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --panel: #101319;
+    --line: #1e242e;
+    --line-hi: #333d4b;
+    --text: #e8e6e1;
+    --dim: #97a1b0;
+    --mute: #8b98a7;
+    --amber: #f0b35a;
+    --mint: #7ee0c2;
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(900px 520px at 50% -12%, #161b23 0%, var(--bg) 62%) var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    padding: 56px 20px 40px;
+  }
+  main { width: 100%; max-width: 980px; }
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0 0 14px;
+  }
+  .lede {
+    margin: 0 0 40px;
+    max-width: 62ch;
+    color: var(--dim);
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    padding: 22px 22px 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color .15s ease, transform .15s ease, background .15s ease;
+  }
+  .card:hover, .card:focus-visible {
+    border-color: var(--line-hi);
+    background: #131820;
+    transform: translateY(-2px);
+    outline: none;
+  }
+  .card:focus-visible { border-color: var(--amber); }
+  .card h2 {
+    font-family: var(--mono);
+    font-size: 1.02rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 0;
+    font-weight: 600;
+  }
+  .card p { margin: 0; color: var(--dim); line-height: 1.55; font-size: 0.94rem; flex: 1; }
+  .card .meta {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--mute);
+  }
+  .card .go { color: var(--amber); font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.08em; }
+  .card.tell h2 { color: var(--amber); }
+  .card.odd h2 { color: #f0b43c; }
+  .card.viv h2 { color: var(--mint); }
+  footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--mute);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  a { color: var(--mint); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Random projects</h1>
+  <p class="lede">Three small browser games. Each is one self-contained HTML file — no build step to play, no dependencies, no network calls. A rule system, a machine on the other side of it, and something worth poking at.</p>
+
+  <ul class="cards">
+    <li>
+      <a class="card tell" href="tell.html">
+        <h2>Tell</h2>
+        <p>A machine guesses your next move and shows you only how sure it is. Land where it isn't looking and you score. After a few rounds it tells you what it noticed about you.</p>
+        <span class="meta">3 moves · 6–200 rounds · ~2 min</span>
+        <span class="go">Play &rarr;</span>
+      </a>
+    </li>
+    <li>
+      <a class="card odd" href="odd-one-out.html">
+        <h2>Odd One Out</h2>
+        <p>101 agents pick between two lanes; the emptier lane pays. Read the lookup tables inside one agent's head, take a seat and play, or run the sweep and watch the crowd's volatility find a floor.</p>
+        <span class="meta">2 lanes · 101 agents</span>
+        <span class="go">Play &rarr;</span>
+      </a>
+    </li>
+    <li>
+      <a class="card viv" href="vivarium.html">
+        <h2>Vivarium</h2>
+        <p>256 levels that nobody wrote: a search generated them, one per cell of a map of how they feel to play. You collect motes and can only charge up near something hunting you. A selector watches and picks the next one.</p>
+        <span class="meta">256 levels · no clock · ~20 s a run</span>
+        <span class="go">Play &rarr;</span>
+      </a>
+    </li>
+  </ul>
+
+  <footer>Keyboard and mouse. Everything runs locally in the page — nothing is sent anywhere.</footer>
+</main>
+</body>
+</html>
